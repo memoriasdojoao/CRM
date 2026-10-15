@@ -17,19 +17,23 @@
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.25s ease-out forwards; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen selection:bg-indigo-100 selection:text-indigo-900">
 
     <!-- TELA DE LOGIN -->
-    <div id="loginScreen" class="fixed inset-0 bg-gradient-to-br from-slate-900 to-indigo-900 z-50 flex flex-col items-center justify-center p-4">
+    <div id="loginScreen" class="fixed inset-0 bg-gradient-to-br from-slate-900 to-indigo-950 z-50 flex flex-col items-center justify-center p-4">
         <div class="mb-10 text-center flex flex-col items-center">
-            <svg class="w-20 h-20 mb-4 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="100" height="100" rx="24" fill="currentColor" fill-opacity="0.1"/>
-                <path d="M70 35H30C27.2386 35 25 37.2386 25 40V70C25 72.7614 27.2386 75 30 75H70C72.7614 75 75 72.7614 75 70V40C75 37.2386 72.7614 35 70 35Z" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M35 35V25C35 20.8579 38.3579 17.5 42.5 17.5H57.5C61.6421 17.5 65 20.8579 65 25V35" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M50 55C52.7614 55 55 52.7614 55 50C55 47.2386 52.7614 45 50 45C47.2386 45 45 47.2386 45 50C45 52.7614 47.2386 55 50 55Z" fill="white"/>
-            </svg>
+            <div class="cursor-pointer select-none" onclick="logoSecretClick()" title="CRM Santos">
+                <svg class="w-20 h-20 mb-4 text-white hover:scale-105 transition-transform" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" rx="24" fill="currentColor" fill-opacity="0.1"/>
+                    <path d="M70 35H30C27.2386 35 25 37.2386 25 40V70C25 72.7614 27.2386 75 30 75H70C72.7614 75 75 72.7614 75 70V40C75 37.2386 72.7614 35 70 35Z" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M35 35V25C35 20.8579 38.3579 17.5 42.5 17.5H57.5C61.6421 17.5 65 20.8579 65 25V35" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M50 55C52.7614 55 55 52.7614 55 50C55 47.2386 52.7614 45 50 45C47.2386 45 45 47.2386 45 50C45 52.7614 47.2386 55 50 55Z" fill="white"/>
+                </svg>
+            </div>
             <h1 class="text-3xl font-extrabold tracking-tight text-white cursor-pointer select-none" onclick="logoSecretClick()">
                 CRM <span class="text-indigo-400">Santos</span>
             </h1>
@@ -38,6 +42,7 @@
 
         <div id="profilesContainer" class="flex flex-wrap justify-center gap-6 max-w-3xl"></div>
 
+        <!-- MODAL SENHA PERFIL -->
         <div id="passwordModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm transform transition-all text-center">
                 <img id="loginAvatar" src="" class="w-16 h-16 rounded-full mx-auto border-4 border-indigo-100 shadow-sm mb-4 object-cover">
@@ -52,16 +57,17 @@
             </div>
         </div>
 
+        <!-- MODAL AUTENTICAÇÃO ADMIN -->
         <div id="adminPasswordModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[55]">
             <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-6 w-full max-w-sm transform transition-all text-center">
-                <div class="text-amber-400 mb-4 text-3xl"><i class="fa-solid fa-lock"></i></div>
-                <h3 class="text-lg font-bold text-white mb-1">Acesso Restrito</h3>
-                <p class="text-sm text-slate-400 mb-6">Insira a chave de administrador</p>
+                <div class="text-amber-400 mb-4 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3 class="text-lg font-bold text-white mb-1">Acesso Restrito Admin</h3>
+                <p class="text-sm text-slate-400 mb-6">Insira a chave mestra de administrador</p>
                 <input type="password" id="inputAdminPassword" class="w-full bg-slate-900 border border-slate-600 text-white rounded-xl px-4 py-3 text-center text-lg tracking-widest focus:bg-slate-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition mb-4" placeholder="••••••••" onkeyup="if(event.key === 'Enter') checkAdminPassword()">
-                <p id="adminError" class="text-rose-400 text-xs font-semibold mb-4 hidden">Acesso negado!</p>
+                <p id="adminError" class="text-rose-400 text-xs font-semibold mb-4 hidden">Chave incorreta!</p>
                 <div class="flex space-x-3">
                     <button onclick="closeAdminPasswordModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-xl text-sm font-semibold transition">Cancelar</button>
-                    <button onclick="checkAdminPassword()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 py-2.5 rounded-xl text-sm font-bold transition shadow-md">Verificar</button>
+                    <button onclick="checkAdminPassword()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 py-2.5 rounded-xl text-sm font-bold transition shadow-md">Acessar</button>
                 </div>
             </div>
         </div>
@@ -72,7 +78,7 @@
         <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm glass-card">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="logoSecretClick()">
-                    <div class="bg-indigo-600 text-white p-1.5 rounded-lg shadow-sm">
+                    <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-sm">
                         <svg class="w-6 h-6" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect width="100" height="100" rx="20" fill="transparent"/>
                             <path d="M70 35H30C27.2386 35 25 37.2386 25 40V70C25 72.7614 27.2386 75 30 75H70C72.7614 75 75 72.7614 75 70V40C75 37.2386 72.7614 35 70 35Z" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -80,21 +86,36 @@
                             <circle cx="50" cy="55" r="5" fill="white"/>
                         </svg>
                     </div>
-                    <h1 class="text-xl font-bold tracking-tight text-slate-900 hidden sm:block">CRM <span class="text-indigo-600">Santos</span></h1>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-slate-900">CRM <span class="text-indigo-600">Santos</span></h1>
+                    </div>
                 </div>
                 
                 <div class="flex items-center space-x-2 sm:space-x-3">
-                    <div class="flex items-center space-x-2 bg-slate-50 px-2 sm:px-3 py-1.5 rounded-xl border border-slate-200" title="Trocar de Conta" onclick="logout()" style="cursor: pointer;">
+                    <!-- Botão Download HTML do CRM -->
+                    <button onclick="downloadCRMHtml()" class="bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center space-x-1.5 shadow-sm" title="Baixar arquivo HTML completo pronto para uso local">
+                        <i class="fa-solid fa-download text-indigo-600"></i>
+                        <span class="hidden md:inline">Baixar HTML</span>
+                    </button>
+
+                    <!-- Botão Config / Apps Script -->
+                    <button onclick="abrirAdminModal()" class="bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 p-2 rounded-xl text-sm transition shadow-sm" title="Configurações & Google Apps Script">
+                        <i class="fa-solid fa-code text-slate-600"></i>
+                    </button>
+
+                    <!-- Perfil Atual / Logout -->
+                    <div class="flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 cursor-pointer transition shadow-sm" title="Trocar de Conta / Sair" onclick="logout()">
                         <img id="headerAvatar" src="" class="w-6 h-6 rounded-full object-cover border border-slate-300">
                         <span id="labelUserStat" class="text-sm font-bold text-slate-800 hidden sm:block">Levi</span>
                         <i class="fa-solid fa-right-from-bracket text-slate-400 hover:text-rose-500 transition text-xs ml-1"></i>
                     </div>
                     
-                    <button onclick="abrirModalCliente()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center space-x-2">
+                    <button onclick="abrirModalCliente()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition shadow-sm shadow-indigo-100 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span class="hidden sm:inline">Novo Cliente</span>
                     </button>
-                    <button onclick="carregarClientes()" id="btnAtualizar" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 p-2 rounded-lg text-sm transition shadow-sm" title="Atualizar dados">
+                    
+                    <button onclick="carregarClientes()" id="btnAtualizar" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 p-2 rounded-xl text-sm transition shadow-sm" title="Atualizar dados">
                         <i class="fa-solid fa-rotate-right"></i>
                     </button>
                 </div>
@@ -105,55 +126,63 @@
             
             <!-- Cards de Métricas Clicáveis -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div onclick="filtrarPorCard('')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-indigo-400 transition group">
+                <div onclick="filtrarPorCard('')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-indigo-400 hover:shadow-md transition group">
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-indigo-600 transition">Total de Clientes</p>
-                        <i class="fa-solid fa-users text-blue-500"></i>
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-indigo-600 transition">Total de Clientes</p>
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
                     </div>
                     <h4 id="statTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
                 </div>
-                <div onclick="filtrarPorCard('Lead')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-amber-400 transition group">
+                <div onclick="filtrarPorCard('Lead')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-amber-400 hover:shadow-md transition group">
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-amber-600 transition">Leads Ativos</p>
-                        <i class="fa-solid fa-bullseye text-amber-500"></i>
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-amber-600 transition">Leads Ativos</p>
+                        <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
                     </div>
                     <h4 id="statLeads" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
                 </div>
-                <div onclick="filtrarPorCard('Em Negociação')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-purple-400 transition group">
+                <div onclick="filtrarPorCard('Em Negociação')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-purple-400 hover:shadow-md transition group">
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-purple-600 transition">Em Negociação</p>
-                        <i class="fa-solid fa-handshake text-purple-500"></i>
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-purple-600 transition">Em Negociação</p>
+                        <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+                            <i class="fa-solid fa-handshake"></i>
+                        </div>
                     </div>
                     <h4 id="statNegociacao" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
                 </div>
-                <div onclick="filtrarPorCard('Fechado')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-emerald-400 transition group">
+                <div onclick="filtrarPorCard('Fechado')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-emerald-400 hover:shadow-md transition group">
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-emerald-600 transition">Fechados</p>
-                        <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-emerald-600 transition">Fechados</p>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
                     </div>
                     <h4 id="statFechado" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
                 </div>
             </div>
 
-            <!-- Toolbar -->
+            <!-- Toolbar de Filtros -->
             <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm mb-6">
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                     <div class="relative w-full lg:w-1/3">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </span>
                         <input type="text" id="inputBusca" onkeyup="aplicarFiltros()" placeholder="Buscar por nome, projeto, email..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                        <select id="filtroStatus" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <select id="filtroStatus" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                             <option value="">Status: Todos</option>
                             <option value="Lead">Lead</option>
                             <option value="Em Negociação">Em Negociação</option>
                             <option value="Fechado">Fechado</option>
                         </select>
 
-                        <select id="filtroZona" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <select id="filtroZona" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                             <option value="">Zona: Todas</option>
                             <option value="Norte">Norte</option>
                             <option value="Sul">Sul</option>
@@ -162,7 +191,7 @@
                             <option value="Centro">Centro</option>
                         </select>
 
-                        <select id="filtroValor" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <select id="filtroValor" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                             <option value="">Valores: Todos</option>
                             <option value="1">Até R$ 300 mil</option>
                             <option value="2">R$ 300 mil - R$ 1 Milhão</option>
@@ -172,17 +201,17 @@
                     </div>
 
                     <div class="flex items-center gap-2 ml-auto w-full lg:w-auto justify-end border-t lg:border-t-0 pt-3 lg:pt-0 mt-1 lg:mt-0 border-slate-100">
-                        <button onclick="exportarPlanilha()" class="w-36 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm">
+                        <button onclick="exportarPlanilha()" class="flex-1 sm:flex-none bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm">
                             <i class="fa-solid fa-file-excel"></i> <span>Exportar</span>
                         </button>
-                        <button onclick="enviarEmailMassa()" class="w-36 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm">
+                        <button onclick="enviarEmailMassa()" class="flex-1 sm:flex-none bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm">
                             <i class="fa-solid fa-envelope"></i> <span>E-mail</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabela -->
+            <!-- Tabela de Clientes -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto hide-scroll">
                     <table class="w-full text-left border-collapse whitespace-nowrap">
@@ -209,9 +238,9 @@
         </main>
     </div>
 
-    <!-- Modal Adicionar/Editar -->
+    <!-- MODAL ADICIONAR / EDITAR CLIENTE -->
     <div id="modalCliente" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto hide-scroll border border-slate-100 transform transition-all">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto hide-scroll border border-slate-100 transform transition-all animate-fade-in">
             <div class="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex items-center justify-between z-10">
                 <h3 id="modalClienteTitulo" class="font-extrabold text-slate-900 text-lg">Novo Registro</h3>
                 <button onclick="fecharModalCliente()" class="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full w-8 h-8 flex items-center justify-center transition">
@@ -219,17 +248,17 @@
                 </button>
             </div>
             <form id="formCliente" onsubmit="salvarCliente(event)" class="p-6 space-y-5">
-                <input type="hidden" id="idxLinha">
+                <input type="hidden" id="clienteId">
                 <input type="hidden" id="originalNome">
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Nome Completo *</label>
-                        <input type="text" id="nome" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                        <input type="text" id="nome" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition" placeholder="Ex: Carlos Eduardo">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">E-mail *</label>
-                        <input type="email" id="email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                        <input type="email" id="email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition" placeholder="cliente@email.com">
                     </div>
                 </div>
                 
@@ -251,7 +280,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Bairro</label>
-                        <input type="text" id="bairro" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                        <input type="text" id="bairro" placeholder="Ex: Moema" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Zona</label>
@@ -281,14 +310,14 @@
                     </div>
                 </div>
 
-                <div class="pt-2 flex items-center justify-between">
-                    <button type="button" id="btnExcluirModal" onclick="excluirClienteAtual()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-4 py-2.5 rounded-xl text-sm font-bold transition hidden flex items-center gap-2">
+                <div class="pt-3 flex items-center justify-between">
+                    <button type="button" id="btnExcluirModal" onclick="excluirClienteAtual()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-4 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2">
                         <i class="fa-solid fa-trash-can"></i> Excluir Cliente
                     </button>
                     
                     <div class="flex items-center space-x-3 ml-auto">
                         <button type="button" onclick="fecharModalCliente()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-bold transition">Cancelar</button>
-                        <button type="submit" id="btnSalvar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition shadow-md shadow-indigo-200 flex items-center">
+                        <button type="submit" id="btnSalvar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition shadow-md shadow-indigo-100 flex items-center">
                             <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Salvar Registro
                         </button>
                     </div>
@@ -297,15 +326,155 @@
         </div>
     </div>
 
+    <!-- MODAL PAINEL ADMIN & CÓDIGO APPS SCRIPT -->
+    <div id="adminPanelModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
+        <div class="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 max-w-3xl w-full max-h-[90vh] overflow-y-auto hide-scroll text-slate-200 p-6">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-gears"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Configuração & Integração</h3>
+                        <p class="text-xs text-slate-400">Sincronização bidirecional com Google Sheets</p>
+                    </div>
+                </div>
+                <button onclick="fecharAdminModal()" class="text-slate-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/60">
+                    <h4 class="font-bold text-amber-400 mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i> Correção Definitiva na Planilha Google
+                    </h4>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        O CRM Santos agora possui <strong>deduplicação inteligente e cache local</strong>: mesmo se a planilha tiver linhas repetidas ou antigas, ele <strong>sempre edita no mesmo registro</strong> e <strong>exclui de fato</strong> sem criar duplicatas.
+                    </p>
+                    <p class="text-xs text-slate-400 mt-2">
+                        Para que as linhas sejam editadas e excluídas <strong>também fisicamente dentro do Google Sheets</strong>, cole o código abaixo no Apps Script da sua planilha:
+                    </p>
+                </div>
+
+                <div class="relative">
+                    <div class="flex items-center justify-between bg-slate-950 px-4 py-2 rounded-t-xl border border-slate-800 text-xs text-slate-400">
+                        <span>Código do Google Apps Script (Código.gs)</span>
+                        <button onclick="copiarCodigoAppsScript()" class="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> Copiar Código
+                        </button>
+                    </div>
+                    <pre id="codigoAppsScript" class="bg-slate-950/90 text-slate-300 p-4 rounded-b-xl border-x border-b border-slate-800 text-xs font-mono overflow-x-auto max-h-56 leading-relaxed select-all">function doGet(e) {
+  try {
+    var sheetName = (e && e.parameter && e.parameter.aba) ? e.parameter.aba : "Levi";
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+      sheet = ss.insertSheet(sheetName);
+      sheet.appendRow(["Data", "Nome", "Email", "Telefone", "Projeto", "Valor estimado", "Bairro", "Zona", "Status", "Tratativa"]);
+      return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+    }
+    var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+    var headers = data[0];
+    var resultado = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var nome = row[1] ? String(row[1]).trim() : "";
+      if (!nome) continue;
+      var obj = {};
+      for (var j = 0; j < headers.length; j++) {
+        var val = row[j];
+        if (val instanceof Date) val = val.toISOString();
+        obj[headers[j]] = (val !== null && val !== undefined) ? String(val) : "";
+      }
+      resultado.push(obj);
+    }
+    return ContentService.createTextOutput(JSON.stringify(resultado)).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  try {
+    var postData = (e && e.postData && e.postData.contents) ? e.postData.contents : "{}";
+    var dados = JSON.parse(postData);
+    var sheetName = dados.aba || "Levi";
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+      sheet = ss.insertSheet(sheetName);
+      sheet.appendRow(["Data", "Nome", "Email", "Telefone", "Projeto", "Valor estimado", "Bairro", "Zona", "Status", "Tratativa"]);
+    }
+    var acao = dados.acao || "novo";
+    var dataRange = sheet.getDataRange();
+    var values = dataRange.getValues();
+
+    if (acao === "excluir") {
+      var targetNome = (dados.originalNome || dados.nome || "").trim().toLowerCase();
+      if (!targetNome) return ContentService.createTextOutput(JSON.stringify({ status: "erro" })).setMimeType(ContentService.MimeType.JSON);
+      for (var i = values.length - 1; i >= 1; i--) {
+        var rowNome = String(values[i][1] || "").trim().toLowerCase();
+        if (rowNome === targetNome) sheet.deleteRow(i + 1);
+      }
+      return ContentService.createTextOutput(JSON.stringify({ status: "sucesso", acao: "excluido" })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (acao === "editar") {
+      var targetNome = (dados.originalNome || "").trim().toLowerCase();
+      var editado = false;
+      if (targetNome) {
+        for (var i = 1; i < values.length; i++) {
+          var rowNome = String(values[i][1] || "").trim().toLowerCase();
+          if (rowNome === targetNome) {
+            sheet.getRange(i + 1, 1, 1, 10).setValues([[
+              new Date(), dados.nome || "", dados.email || "", dados.telefone || "",
+              dados.projeto || "", dados.valorEstimado || "", dados.bairro || "",
+              dados.zona || "", dados.status || "Lead", dados.tratativa || ""
+            ]]);
+            editado = true;
+            break;
+          }
+        }
+      }
+      if (!editado) {
+        sheet.appendRow([new Date(), dados.nome || "", dados.email || "", dados.telefone || "", dados.projeto || "", dados.valorEstimado || "", dados.bairro || "", dados.zona || "", dados.status || "Lead", dados.tratativa || ""]);
+      }
+      return ContentService.createTextOutput(JSON.stringify({ status: "sucesso", acao: "editado" })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (acao === "novo") {
+      sheet.appendRow([new Date(), dados.nome || "", dados.email || "", dados.telefone || "", dados.projeto || "", dados.valorEstimado || "", dados.bairro || "", dados.zona || "", dados.status || "Lead", dados.tratativa || ""]);
+      return ContentService.createTextOutput(JSON.stringify({ status: "sucesso", acao: "adicionado" })).setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "erro", erro: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button onclick="limparCacheLocalComConfirmacao()" class="text-rose-400 hover:text-rose-300 text-xs font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-trash-arrow-up"></i> Limpar Cache Local & Histórico
+                    </button>
+                    <button onclick="fecharAdminModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-5 py-2 rounded-xl text-xs font-bold transition">
+                        Fechar Painel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Script JS do CRM -->
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWEgRAYuGBJ6Wbpdf7MjwpS3-iqwdldHqCAFteYLOS8ONpm_V-rZwdoozeCULuMFrc/exec";
-        const ADMIN_HASH = "QExldmkxNjEx";
+        const ADMIN_HASH = "QExldmkxNjEx"; // Senha Admin: @Levi1611
 
         const defaultProfiles = {
             user1: { id: 'user1', name: 'Levi', passHash: 'bGV2aTE2MTE=', photo: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80' },
             user2: { id: 'user2', name: 'Selma', passHash: 'c2VsbWExNjEx', photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80' },
-            user3: { id: 'user3', name: 'YXJpYW55MTYxMQ==', passHash: 'YXJpYW55MTYxMQ==', name: 'Ariany', photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80' }
+            user3: { id: 'user3', name: 'Ariany', passHash: 'YXJpYW55MTYxMQ==', photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80' }
         };
 
         let profiles = JSON.parse(localStorage.getItem('crm_santos_profiles')) || defaultProfiles;
@@ -332,7 +501,7 @@
             container.innerHTML = '';
             Object.values(profiles).forEach(p => {
                 container.innerHTML += `
-                    <div onclick="openPasswordModal('${p.id}')" class="bg-white/10 hover:bg-white/25 backdrop-blur-md border border-white/20 p-6 rounded-3xl cursor-pointer transform hover:-translate-y-2 transition-all duration-300 w-36 sm:w-44 text-center group shadow-xl">
+                    <div onclick="openPasswordModal('${p.id}')" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 p-6 rounded-3xl cursor-pointer transform hover:-translate-y-2 transition-all duration-300 w-36 sm:w-44 text-center group shadow-xl">
                         <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4">
                             <img src="${p.photo}" class="w-full h-full rounded-full object-cover border-4 border-indigo-500/50 group-hover:border-indigo-400 shadow-lg transition">
                         </div>
@@ -374,7 +543,7 @@
             activeUserId = userId;
             localStorage.setItem('crm_santos_activeUser', activeUserId);
             if(novoLogin) {
-                let expireTime = new Date().getTime() + (3 * 24 * 60 * 60 * 1000);
+                let expireTime = new Date().getTime() + (3 * 24 * 60 * 60 * 1000); // 3 dias
                 localStorage.setItem('crm_santos_session_expiry', expireTime.toString());
             }
             const user = profiles[activeUserId];
@@ -382,6 +551,14 @@
             document.getElementById('headerAvatar').src = user.photo;
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
+
+            // Carrega primeiro o cache local para exibição instantânea
+            let cached = carregarCacheLocal();
+            if(cached && cached.length > 0) {
+                listaClientes = cached;
+                aplicarFiltros();
+            }
+
             carregarClientes();
         }
 
@@ -390,29 +567,52 @@
             localStorage.removeItem('crm_santos_session_expiry');
             activeUserId = null;
             listaClientes = [];
+            clientesFiltrados = [];
             renderLoginScreen();
         }
 
+        // ==========================================
+        // MÁSCARA E FORMATAÇÃO DE MOEDA (CORRIGIDA)
+        // ==========================================
         function mascaraMoeda(i) {
             let v = i.value.replace(/\D/g,'');
             if(v === '') { i.value = ''; return; }
-            v = (v/100).toFixed(2) + '';
-            v = v.replace(".", ",");
-            v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-            i.value = 'R$ ' + v;
+            if(v.length > 12) v = v.substring(0, 12);
+            let num = (parseInt(v, 10) / 100).toFixed(2);
+            let parts = num.split('.');
+            parts[0] = parts[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+            i.value = 'R$ ' + parts.join(',');
         }
 
         function extrairNumero(str) {
-            if(!str) return 0;
-            let numStr = String(str).replace(/[^\d,-]/g, '').replace(',', '.');
+            if(!str && str !== 0) return 0;
+            if(typeof str === 'number') return str;
+            let s = String(str).trim();
+            if(s.includes(',')) {
+                s = s.replace(/\./g, '').replace(',', '.');
+            }
+            let numStr = s.replace(/[^\d.-]/g, '');
             return parseFloat(numStr) || 0;
         }
 
         function formatarMoedaView(valor) {
             let num = extrairNumero(valor);
+            if(num === 0 && (!valor || valor === '0' || valor === 0)) return 'R$ 0,00';
             return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
+        function formatarValorParaInput(val) {
+            if(val === null || val === undefined || val === '') return '';
+            let str = String(val).trim();
+            if(str.startsWith('R$')) return str;
+            let num = extrairNumero(str);
+            if(num === 0) return '';
+            return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // ==========================================
+        // CONTROLE DE ADMIN & SECRET CLICKS
+        // ==========================================
         let secretClicks = 0;
         let secretTimeout = null;
         function logoSecretClick() {
@@ -420,13 +620,21 @@
             clearTimeout(secretTimeout);
             if(secretClicks >= 5) {
                 secretClicks = 0;
-                document.getElementById('inputAdminPassword').value = '';
-                document.getElementById('adminError').classList.add('hidden');
-                document.getElementById('adminPasswordModal').classList.remove('hidden');
-                setTimeout(() => document.getElementById('inputAdminPassword').focus(), 100);
+                abrirAdminPasswordPrompt();
             } else {
                 secretTimeout = setTimeout(() => { secretClicks = 0; }, 2000);
             }
+        }
+
+        function abrirAdminModal() {
+            abrirAdminPasswordPrompt();
+        }
+
+        function abrirAdminPasswordPrompt() {
+            document.getElementById('inputAdminPassword').value = '';
+            document.getElementById('adminError').classList.add('hidden');
+            document.getElementById('adminPasswordModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('inputAdminPassword').focus(), 100);
         }
 
         function closeAdminPasswordModal() {
@@ -437,38 +645,173 @@
             const pass = document.getElementById('inputAdminPassword').value;
             if(btoa(pass) === ADMIN_HASH) {
                 closeAdminPasswordModal();
-                alert("Acesso autorizado de administrador.");
+                document.getElementById('adminPanelModal').classList.remove('hidden');
             } else {
                 document.getElementById('adminError').classList.remove('hidden');
             }
         }
 
-        async function carregarClientes() {
-            const btn = document.getElementById('btnAtualizar');
-            btn.classList.add('fa-spin');
+        function fecharAdminModal() {
+            document.getElementById('adminPanelModal').classList.add('hidden');
+        }
+
+        function copiarCodigoAppsScript() {
+            const code = document.getElementById('codigoAppsScript').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                mostrarToast("Código do Apps Script copiado!");
+            }).catch(() => {
+                mostrarToast("Selecione e copie o texto manualmente.");
+            });
+        }
+
+        function downloadCRMHtml() {
+            const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "crm_santos.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            mostrarToast("Download do arquivo HTML iniciado!");
+        }
+
+        // ==========================================
+        // GERENCIAMENTO DE EXCLUSÃO & CACHE LOCAL
+        // ==========================================
+        function getDeletedClients(userId) {
             try {
-                let currentUserName = profiles[activeUserId].name;
-                let resposta = await fetch(`${WEB_APP_URL}?aba=${encodeURIComponent(currentUserName)}`);
+                let raw = localStorage.getItem(`crm_santos_deleted_${userId}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function marcarClienteDeletado(userId, nome) {
+            if(!nome) return;
+            let norm = nome.trim().toLowerCase();
+            let lista = getDeletedClients(userId);
+            if(!lista.includes(norm)) {
+                lista.push(norm);
+                localStorage.setItem(`crm_santos_deleted_${userId}`, JSON.stringify(lista));
+            }
+        }
+
+        function desmarcarClienteDeletado(userId, nome) {
+            if(!nome) return;
+            let norm = nome.trim().toLowerCase();
+            let lista = getDeletedClients(userId).filter(n => n !== norm);
+            localStorage.setItem(`crm_santos_deleted_${userId}`, JSON.stringify(lista));
+        }
+
+        function salvarCacheLocal() {
+            if(!activeUserId) return;
+            try {
+                localStorage.setItem(`crm_santos_cache_${activeUserId}`, JSON.stringify(listaClientes));
+            } catch(e) {
+                console.warn("Erro ao salvar cache local:", e);
+            }
+        }
+
+        function carregarCacheLocal() {
+            if(!activeUserId) return [];
+            try {
+                let raw = localStorage.getItem(`crm_santos_cache_${activeUserId}`);
+                return raw ? JSON.parse(raw) : [];
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function limparCacheLocalComConfirmacao() {
+            if(!confirm("Deseja realmente limpar o cache local e restaurar a sincronização original com a planilha?")) return;
+            localStorage.removeItem(`crm_santos_cache_${activeUserId}`);
+            localStorage.removeItem(`crm_santos_deleted_${activeUserId}`);
+            fecharAdminModal();
+            mostrarToast("Cache limpo! Recarregando dados da planilha...");
+            carregarClientes();
+        }
+
+        // ==========================================
+        // CARREGAR CLIENTES COM DEDUPLICAÇÃO REAL
+        // ==========================================
+        async function carregarClientes(showSpinner = true) {
+            const btn = document.getElementById('btnAtualizar');
+            const icon = btn.querySelector('i');
+            if(icon && showSpinner) icon.classList.add('fa-spin');
+
+            const currentUser = profiles[activeUserId];
+            if(!currentUser) return;
+
+            try {
+                let resposta = await fetch(`${WEB_APP_URL}?aba=${encodeURIComponent(currentUser.name)}&_t=${Date.now()}`);
                 let dados = await resposta.json();
                 
-                listaClientes = dados.map(item => ({
-                    Nome: item.Nome || item.nome || '',
-                    Email: item.Email || item.email || '',
-                    Telefone: item.Telefone || item.telefone || '',
-                    Projeto: item.Projeto || item.projeto || '',
-                    ValorEstimado: item['Valor estimado'] || item.ValorEstimado || item.valorEstimado || '0',
-                    Bairro: item.Bairro || item.bairro || '',
-                    Zona: item.Zona || item.zona || '',
-                    Status: item.Status || item.status || 'Lead',
-                    Tratativa: item.Tratativa || item.tratativa || ''
-                })).reverse();
+                if(Array.isArray(dados)) {
+                    let deletedNames = getDeletedClients(activeUserId);
 
-                aplicarFiltros(); 
+                    // 1. Filtra registros vazios
+                    let validos = dados.filter(item => {
+                        let nome = (item.Nome || item.nome || '').trim();
+                        let email = (item.Email || item.email || '').trim();
+                        let tel = (item.Telefone || item.telefone || '').toString().trim();
+                        return nome !== '' || email !== '' || tel !== '';
+                    });
+
+                    // 2. Filtra clientes que foram excluídos pelo usuário
+                    validos = validos.filter(item => {
+                        let nomeNorm = (item.Nome || item.nome || '').trim().toLowerCase();
+                        return !deletedNames.includes(nomeNorm);
+                    });
+
+                    // 3. DEDUPLICAÇÃO INTELIGENTE (O mais recente vence):
+                    // Como a planilha do Google adiciona linhas no final, a última ocorrência de um cliente
+                    // é sempre a versão mais recente e atualizada.
+                    let mapPorCliente = new Map();
+                    validos.forEach((item, idx) => {
+                        let nome = (item.Nome || item.nome || '').trim();
+                        let key = nome.toLowerCase();
+                        if(!key) key = 'item_' + idx;
+
+                        let clienteObj = {
+                            id: 'cli_' + (idx + 1) + '_' + Math.random().toString(36).substr(2, 5),
+                            Nome: nome,
+                            Email: (item.Email || item.email || '').trim(),
+                            Telefone: (item.Telefone || item.telefone || '').toString().trim(),
+                            Projeto: (item.Projeto || item.projeto || '').trim(),
+                            ValorEstimado: (item['Valor estimado'] !== undefined ? item['Valor estimado'] : (item.ValorEstimado || item.valorEstimado || '0')),
+                            Bairro: (item.Bairro || item.bairro || '').trim(),
+                            Zona: (item.Zona || item.zona || '').trim(),
+                            Status: (item.Status || item.status || 'Lead').trim(),
+                            Tratativa: (item.Tratativa || item.tratativa || '').trim(),
+                            Data: item.Data || item.data || ''
+                        };
+
+                        // Sobrescreve com a versão mais recente
+                        mapPorCliente.set(key, clienteObj);
+                    });
+
+                    // Inverte a lista para exibir os mais recentes no topo
+                    listaClientes = Array.from(mapPorCliente.values()).reverse();
+                    salvarCacheLocal();
+                    aplicarFiltros(); 
+                }
             } catch (erro) {
-                console.error("Erro:", erro);
-                document.getElementById('tabelaClientes').innerHTML = `<tr><td colspan="6" class="py-8 text-center text-rose-500 font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Erro ao buscar dados da aba ${profiles[activeUserId].name}.</td></tr>`;
+                console.error("Erro ao sincronizar com Google Sheets:", erro);
+                if(listaClientes.length === 0) {
+                    document.getElementById('tabelaClientes').innerHTML = `
+                        <tr>
+                            <td colspan="6" class="py-12 text-center text-rose-500 font-semibold">
+                                <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 block"></i>
+                                Erro ao buscar dados da aba ${currentUser.name}. Verifique a conexão com a internet.
+                            </td>
+                        </tr>`;
+                }
             } finally {
-                btn.classList.remove('fa-spin');
+                if(icon) icon.classList.remove('fa-spin');
             }
         }
 
@@ -478,13 +821,18 @@
         }
 
         function aplicarFiltros() {
-            let busca = document.getElementById('inputBusca').value.toLowerCase();
+            let busca = document.getElementById('inputBusca').value.toLowerCase().trim();
             let status = document.getElementById('filtroStatus').value;
             let zona = document.getElementById('filtroZona').value;
             let valorRange = document.getElementById('filtroValor').value;
 
             clientesFiltrados = listaClientes.filter(c => {
-                let textMatch = (c.Nome.toLowerCase().includes(busca) || c.Projeto.toLowerCase().includes(busca) || c.Email.toLowerCase().includes(busca) || c.Tratativa.toLowerCase().includes(busca));
+                let textMatch = !busca || (
+                    (c.Nome || '').toLowerCase().includes(busca) || 
+                    (c.Projeto || '').toLowerCase().includes(busca) || 
+                    (c.Email || '').toLowerCase().includes(busca) || 
+                    (c.Tratativa || '').toLowerCase().includes(busca)
+                );
                 let statusMatch = status === "" || c.Status === status;
                 let zonaMatch = zona === "" || c.Zona === zona;
                 
@@ -507,7 +855,13 @@
             tabela.innerHTML = "";
 
             if (dados.length === 0) {
-                tabela.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-slate-400 font-medium"><i class="fa-solid fa-folder-open text-3xl mb-3 opacity-50 block"></i>Nenhum lead encontrado com estes filtros.</td></tr>`;
+                tabela.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-slate-400 font-medium">
+                            <i class="fa-solid fa-folder-open text-3xl mb-3 opacity-40 block"></i>
+                            Nenhum cliente encontrado com os filtros atuais.
+                        </td>
+                    </tr>`;
                 return;
             }
 
@@ -517,36 +871,61 @@
                 if (cliente.Status === 'Fechado') badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
                 
                 let valorFmt = formatarMoedaView(cliente.ValorEstimado);
-                let realIndex = listaClientes.indexOf(cliente);
+                let cleanPhone = (cliente.Telefone || '').replace(/\D/g, '');
+                let whatsappBtn = '';
+                if(cleanPhone.length >= 10) {
+                    let fullPhone = cleanPhone.startsWith('55') ? cleanPhone : '55' + cleanPhone;
+                    whatsappBtn = `
+                        <a href="https://wa.me/${fullPhone}" target="_blank" onclick="event.stopPropagation()" class="text-emerald-600 hover:text-emerald-700 ml-1.5" title="Conversar no WhatsApp">
+                            <i class="fa-brands fa-whatsapp text-sm"></i>
+                        </a>
+                    `;
+                }
 
                 let linha = `
-                <tr class="hover:bg-slate-50 transition border-b border-slate-100 last:border-0 group cursor-pointer" onclick="editarCliente(${realIndex}, event)">
+                <tr class="hover:bg-slate-50/90 transition border-b border-slate-100 last:border-0 group cursor-pointer" onclick="editarClientePorId('${cliente.id}', event)">
                     <td class="py-4 px-5">
-                        <div class="font-extrabold text-slate-900">${cliente.Nome}</div>
-                        <div class="text-[11px] font-semibold text-indigo-600 mt-1 uppercase tracking-wide"><i class="fa-solid fa-building mr-1"></i>${cliente.Projeto || '-'}</div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600 transition">${cliente.Nome}</div>
+                        <div class="text-[11px] font-semibold text-slate-500 mt-0.5 uppercase tracking-wide">
+                            <i class="fa-solid fa-building text-indigo-500 mr-1"></i>${cliente.Projeto || '-'}
+                        </div>
                     </td>
                     <td class="py-4 px-5">
-                        <div class="text-sm font-medium text-slate-700">${cliente.Email}</div>
-                        <div class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-phone mr-1 text-slate-300"></i>${cliente.Telefone || '-'}</div>
+                        <div class="text-sm font-medium text-slate-700">${cliente.Email || '-'}</div>
+                        <div class="text-xs text-slate-500 mt-0.5 flex items-center">
+                            <i class="fa-solid fa-phone mr-1 text-slate-300"></i>
+                            <span>${cliente.Telefone || '-'}</span>
+                            ${whatsappBtn}
+                        </div>
                     </td>
                     <td class="py-4 px-5">
-                        <div class="font-bold text-slate-800 text-sm mb-0.5">${valorFmt}</div>
-                        <div class="text-[11px] text-slate-500 font-medium uppercase"><i class="fa-solid fa-map-pin mr-1 text-slate-300"></i>${cliente.Zona || '-'} ${cliente.Bairro ? '('+cliente.Bairro+')' : ''}</div>
+                        <div class="font-extrabold text-slate-800 text-sm mb-0.5">${valorFmt}</div>
+                        <div class="text-[11px] text-slate-500 font-medium uppercase">
+                            <i class="fa-solid fa-location-dot mr-1 text-slate-300"></i>${cliente.Zona || '-'} ${cliente.Bairro ? '('+cliente.Bairro+')' : ''}
+                        </div>
                     </td>
                     <td class="py-4 px-5">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-black uppercase border ${badgeClass}">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase border ${badgeClass}">
                             ${cliente.Status}
                         </span>
                     </td>
-                    <td class="py-4 px-5 max-w-[200px]">
-                        <div class="text-xs text-slate-600 truncate whitespace-normal line-clamp-2" title="${cliente.Tratativa}">
+                    <td class="py-4 px-5 max-w-[220px]">
+                        <div class="text-xs text-slate-600 truncate whitespace-normal line-clamp-2" title="${cliente.Tratativa || ''}">
                             <i class="fa-regular fa-comment-dots mr-1 text-slate-400"></i>${cliente.Tratativa || '<span class="italic text-slate-400">Clique para adicionar tratativa</span>'}
                         </div>
                     </td>
                     <td class="py-4 px-5 text-center">
-                        <button onclick="copiarDetalhes('${cliente.Nome.replace(/'/g,"\'").replace(/"/g,"&quot;")}', '${cliente.Email}', '${cliente.Telefone}', '${cliente.Projeto.replace(/'/g,"\'").replace(/"/g,"&quot;")}'); event.stopPropagation();" class="text-slate-400 hover:text-indigo-600 bg-white hover:bg-indigo-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Copiar contato">
-                            <i class="fa-regular fa-copy"></i>
-                        </button>
+                        <div class="flex items-center justify-center space-x-1.5" onclick="event.stopPropagation()">
+                            <button onclick="copiarDetalhesCliente('${cliente.id}')" class="text-slate-400 hover:text-indigo-600 bg-white hover:bg-indigo-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Copiar informações">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                            <button onclick="editarClientePorId('${cliente.id}', event)" class="text-slate-400 hover:text-amber-600 bg-white hover:bg-amber-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Editar cliente">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="confirmarExclusaoRapida('${cliente.id}')" class="text-slate-400 hover:text-rose-600 bg-white hover:bg-rose-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Excluir cliente">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>`;
                 tabela.innerHTML += linha;
@@ -562,12 +941,12 @@
 
         function enviarEmailMassa() {
             if(clientesFiltrados.length === 0) {
-                alert("Nenhum cliente para enviar e-mail. Ajuste os filtros.");
+                mostrarToast("Nenhum cliente para enviar e-mail.", "erro");
                 return;
             }
-            let emails = clientesFiltrados.map(c => c.Email).filter(e => e.trim() !== "").join(",");
+            let emails = clientesFiltrados.map(c => c.Email).filter(e => e && e.trim() !== "").join(",");
             if(emails === "") {
-                alert("Os clientes filtrados não possuem e-mail cadastrado.");
+                mostrarToast("Os clientes filtrados não possuem e-mail cadastrado.", "erro");
                 return;
             }
             window.location.href = `mailto:?bcc=${emails}&subject=Contato CRM Santos`;
@@ -575,41 +954,53 @@
 
         function exportarPlanilha() {
             if(clientesFiltrados.length === 0) {
-                alert("Nenhum cliente para exportar.");
+                mostrarToast("Nenhum cliente para exportar.", "erro");
                 return;
             }
-            let csvContent = "data:text/csv;charset=utf-8,";
             let cabecalhos = ["Nome", "Email", "Telefone", "Projeto", "Valor Estimado", "Bairro", "Zona", "Status", "Tratativa"];
-            csvContent += cabecalhos.join(";") + "\r\n";
+            let linhasCsv = [cabecalhos.join(";")];
+
             clientesFiltrados.forEach(c => {
                 let linha = [
                     c.Nome, c.Email, c.Telefone, c.Projeto, c.ValorEstimado, c.Bairro, c.Zona, c.Status, 
-                    (c.Tratativa || "").replace(/\n/g, " ").replace(/;/g, ",") 
-                ].map(v => `"${v}"`).join(";");
-                csvContent += linha + "\r\n";
+                    (c.Tratativa || "").replace(/\r?\n|\r/g, " ").replace(/;/g, ",") 
+                ].map(v => `"${(v || '').toString().replace(/"/g, '""')}"`).join(";");
+                linhasCsv.push(linha);
             });
-            var encodedUri = encodeURI(csvContent);
-            var link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+
+            // Adiciona BOM UTF-8 (\uFEFF) para abrir com acentuação correta no Excel brasileiro
+            let conteudoCsv = "\uFEFF" + linhasCsv.join("\r\n");
+            let blob = new Blob([conteudoCsv], { type: "text/csv;charset=utf-8;" });
+            let url = URL.createObjectURL(blob);
+            let link = document.createElement("a");
+            link.setAttribute("href", url);
             link.setAttribute("download", `Export_CRM_${profiles[activeUserId].name}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            mostrarToast("Planilha CSV exportada com sucesso!");
         }
 
+        // ==========================================
+        // ADIÇÃO / EDIÇÃO DE CLIENTES (SEM DUPLICATAS)
+        // ==========================================
         function abrirModalCliente() {
             document.getElementById('formCliente').reset();
-            document.getElementById('idxLinha').value = "";
+            document.getElementById('clienteId').value = "";
             document.getElementById('originalNome').value = "";
             document.getElementById('modalClienteTitulo').innerText = "Novo Registro";
             document.getElementById('btnExcluirModal').classList.add('hidden');
             document.getElementById('modalCliente').classList.remove('hidden');
+            setTimeout(() => document.getElementById('nome').focus(), 100);
         }
 
-        function editarCliente(index, event) {
-            if(event.target.closest('button')) return;
-            let c = listaClientes[index];
-            document.getElementById('idxLinha').value = index;
+        function editarClientePorId(id, event) {
+            if(event && event.target && event.target.closest('button')) return;
+            let c = listaClientes.find(item => item.id === id);
+            if(!c) return;
+
+            document.getElementById('clienteId').value = c.id;
             document.getElementById('originalNome').value = c.Nome; 
             document.getElementById('nome').value = c.Nome;
             document.getElementById('email').value = c.Email;
@@ -621,10 +1012,7 @@
             document.getElementById('tratativa').value = c.Tratativa;
             
             let inputV = document.getElementById('valorEstimado');
-            inputV.value = c.ValorEstimado;
-            if(!String(c.ValorEstimado).includes('R$')) {
-                mascaraMoeda(inputV);
-            }
+            inputV.value = formatarValorParaInput(c.ValorEstimado);
 
             document.getElementById('modalClienteTitulo').innerText = "Editar: " + c.Nome;
             document.getElementById('btnExcluirModal').classList.remove('hidden');
@@ -638,85 +1026,216 @@
         async function salvarCliente(event) {
             event.preventDefault();
             const btn = document.getElementById('btnSalvar');
+            const originalBtnHtml = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Salvando...';
             btn.disabled = true;
 
-            const isEdit = document.getElementById('idxLinha').value !== "";
-            let originalNome = document.getElementById('originalNome').value;
-            let nomeAtual = document.getElementById('nome').value;
+            const clienteId = document.getElementById('clienteId').value;
+            const isEdit = Boolean(clienteId);
+            const originalNome = document.getElementById('originalNome').value.trim();
+            const nomeAtual = document.getElementById('nome').value.trim();
+            const emailAtual = document.getElementById('email').value.trim();
+            const telefoneAtual = document.getElementById('telefone').value.trim();
+            const projetoAtual = document.getElementById('projeto').value.trim();
+            const valorAtual = document.getElementById('valorEstimado').value.trim();
+            const bairroAtual = document.getElementById('bairro').value.trim();
+            const zonaAtual = document.getElementById('zona').value;
+            const statusAtual = document.getElementById('status').value;
+            const tratativaAtual = document.getElementById('tratativa').value.trim();
 
-            if(!isEdit) {
-                originalNome = nomeAtual;
+            if(!nomeAtual) {
+                mostrarToast("Por favor, preencha o Nome Completo.", "erro");
+                btn.innerHTML = originalBtnHtml;
+                btn.disabled = false;
+                return;
             }
 
-            const dadosCliente = {
+            const dadosPayload = {
                 acao: isEdit ? "editar" : "novo",
                 aba: profiles[activeUserId].name,
-                originalNome: originalNome,
+                originalNome: originalNome || nomeAtual,
                 nome: nomeAtual,
-                email: document.getElementById('email').value,
-                telefone: document.getElementById('telefone').value,
-                projeto: document.getElementById('projeto').value,
-                valorEstimado: document.getElementById('valorEstimado').value,
-                bairro: document.getElementById('bairro').value,
-                zona: document.getElementById('zona').value,
-                status: document.getElementById('status').value,
-                tratativa: document.getElementById('tratativa').value
+                email: emailAtual,
+                telefone: telefoneAtual,
+                projeto: projetoAtual,
+                valorEstimado: valorAtual,
+                bairro: bairroAtual,
+                zona: zonaAtual,
+                status: statusAtual,
+                tratativa: tratativaAtual
             };
 
+            // 1. ATUALIZAÇÃO IMEDIATA NO ESTADO LOCAL (OPTIMISTIC UI):
+            if(isEdit) {
+                // Localiza o cliente existente
+                let index = listaClientes.findIndex(c => c.id === clienteId || (originalNome && c.Nome.trim().toLowerCase() === originalNome.toLowerCase()));
+                if(index !== -1) {
+                    // ATUALIZA NO MESMO REGISTRO (NÃO ADICIONA OUTRO!)
+                    listaClientes[index].Nome = nomeAtual;
+                    listaClientes[index].Email = emailAtual;
+                    listaClientes[index].Telefone = telefoneAtual;
+                    listaClientes[index].Projeto = projetoAtual;
+                    listaClientes[index].ValorEstimado = valorAtual;
+                    listaClientes[index].Bairro = bairroAtual;
+                    listaClientes[index].Zona = zonaAtual;
+                    listaClientes[index].Status = statusAtual;
+                    listaClientes[index].Tratativa = tratativaAtual;
+                }
+                
+                // Se o nome foi alterado, marcar o nome antigo como substituído para não reaparecer
+                if(originalNome && originalNome.toLowerCase() !== nomeAtual.toLowerCase()) {
+                    marcarClienteDeletado(activeUserId, originalNome);
+                }
+            } else {
+                // Adiciona novo registro no topo
+                const novoObj = {
+                    id: 'cli_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                    Nome: nomeAtual,
+                    Email: emailAtual,
+                    Telefone: telefoneAtual,
+                    Projeto: projetoAtual,
+                    ValorEstimado: valorAtual,
+                    Bairro: bairroAtual,
+                    Zona: zonaAtual,
+                    Status: statusAtual,
+                    Tratativa: tratativaAtual,
+                    Data: new Date().toISOString()
+                };
+                desmarcarClienteDeletado(activeUserId, nomeAtual);
+                listaClientes.unshift(novoObj);
+            }
+
+            // Persiste localmente e atualiza a interface imediatamente
+            salvarCacheLocal();
+            aplicarFiltros();
+            fecharModalCliente();
+            mostrarToast(isEdit ? "Cliente atualizado com sucesso!" : "Novo cliente adicionado com sucesso!");
+
+            // 2. ENVIA PARA A PLANILHA EM SEGUNDO PLANO
             try {
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dadosCliente)
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(dadosPayload)
                 });
-
-                fecharModalCliente();
-                alert(`Registro processado com sucesso na aba de ${profiles[activeUserId].name}!`);
-                setTimeout(carregarClientes, 1500);
+                
+                // Recarrega em segundo plano para manter integridade
+                setTimeout(() => {
+                    carregarClientes(false);
+                }, 3000);
             } catch (erro) {
-                console.error(erro);
-                alert("Erro ao salvar dados. Verifique a conexão.");
+                console.warn("Aviso ao enviar para o Google Sheets:", erro);
             } finally {
-                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Salvar Registro';
+                btn.innerHTML = originalBtnHtml;
                 btn.disabled = false;
             }
         }
 
+        // ==========================================
+        // EXCLUSÃO REAL DE CLIENTES
+        // ==========================================
         async function excluirClienteAtual() {
-            let originalNome = document.getElementById('originalNome').value;
-            if(!originalNome) return;
+            const clienteId = document.getElementById('clienteId').value;
+            const originalNome = (document.getElementById('originalNome').value || document.getElementById('nome').value).trim();
+            if(!originalNome && !clienteId) return;
 
-            if(!confirm(`Tem certeza que deseja excluir o cliente "${originalNome}"?`)) return;
+            if(!confirm(`Tem certeza que deseja excluir o cliente "${originalNome}"?\nEle será removido definitivamente do CRM.`)) return;
 
-            const dadosCliente = {
+            executarExclusao(clienteId, originalNome);
+        }
+
+        function confirmarExclusaoRapida(clienteId) {
+            let c = listaClientes.find(item => item.id === clienteId);
+            if(!c) return;
+            if(!confirm(`Deseja excluir o cliente "${c.Nome}" do CRM?`)) return;
+            executarExclusao(clienteId, c.Nome);
+        }
+
+        async function executarExclusao(clienteId, nomeCliente) {
+            // 1. Marca como excluído persistentemente no localStorage
+            marcarClienteDeletado(activeUserId, nomeCliente);
+
+            // 2. Remove do array em memória imediatamente
+            listaClientes = listaClientes.filter(c => {
+                if(clienteId && c.id === clienteId) return false;
+                if(nomeCliente && c.Nome.trim().toLowerCase() === nomeCliente.toLowerCase()) return false;
+                return true;
+            });
+
+            // 3. Atualiza cache local e interface imediatamente
+            salvarCacheLocal();
+            aplicarFiltros();
+            fecharModalCliente();
+            mostrarToast(`Cliente "${nomeCliente}" excluído com sucesso!`);
+
+            // 4. Envia exclusão para o Google Apps Script
+            const dadosPayload = {
                 acao: "excluir",
                 aba: profiles[activeUserId].name,
-                originalNome: originalNome
+                originalNome: nomeCliente
             };
 
             try {
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
                     mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dadosCliente)
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(dadosPayload)
                 });
-
-                fecharModalCliente();
-                alert("Cliente excluído com sucesso!");
-                setTimeout(carregarClientes, 1500);
             } catch (erro) {
-                console.error(erro);
-                alert("Erro ao excluir cliente.");
+                console.warn("Aviso ao registrar exclusão no Google Sheets:", erro);
             }
         }
 
-        function copiarDetalhes(nome, email, telefone, projeto) {
-            let ztexto = "Nome: " + nome + "\nProjeto: " + projeto + "\nE-mail: " + email + "\nTelefone: " + telefone;
-            navigator.clipboard.writeText(ztexto);
-            alert("Dados copiados para a área de transferência!");
+        function copiarDetalhesCliente(clienteId) {
+            let cliente = listaClientes.find(c => c.id === clienteId);
+            if(!cliente) return;
+            let texto = `Nome: ${cliente.Nome}\nProjeto: ${cliente.Projeto || '-'}\nE-mail: ${cliente.Email || '-'}\nTelefone: ${cliente.Telefone || '-'}\nValor Estimado: ${formatarMoedaView(cliente.ValorEstimado)}\nStatus: ${cliente.Status}\nTratativa: ${cliente.Tratativa || '-'}`;
+            
+            navigator.clipboard.writeText(texto).then(() => {
+                mostrarToast("Dados copiados para a área de transferência!");
+            }).catch(() => {
+                let ta = document.createElement("textarea");
+                ta.value = texto;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand("copy");
+                document.body.removeChild(ta);
+                mostrarToast("Dados copiados para a área de transferência!");
+            });
+        }
+
+        // ==========================================
+        // NOTIFICAÇÕES TOAST MODERNAS
+        // ==========================================
+        function mostrarToast(mensagem, tipo = 'sucesso') {
+            let container = document.getElementById('toastContainer');
+            if(!container) {
+                container = document.createElement('div');
+                container.id = 'toastContainer';
+                container.className = 'fixed bottom-5 right-5 z-[100] flex flex-col space-y-2 pointer-events-none';
+                document.body.appendChild(container);
+            }
+            
+            let toast = document.createElement('div');
+            toast.className = `transform transition-all duration-300 ease-out translate-y-4 opacity-0 pointer-events-auto flex items-center space-x-3 px-4 py-3 rounded-xl shadow-xl border text-sm font-semibold ${
+                tipo === 'erro' ? 'bg-rose-900/95 text-white border-rose-700' : 'bg-slate-900/95 text-white border-slate-700'
+            }`;
+            
+            let icone = tipo === 'erro' ? 'fa-circle-exclamation text-rose-400' : 'fa-circle-check text-emerald-400';
+            toast.innerHTML = `<i class="fa-solid ${icone} text-lg"></i><span>${mensagem}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 10);
+            
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
         }
     </script>
 </body>
