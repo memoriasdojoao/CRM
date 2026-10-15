@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Multi-usuários - Google Sheets Backend</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+    
+    <!-- Top Navigation / Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-sm">
+                    <i class="fa-solid fa-address-book text-lg"></i>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">Meu CRM Cloud</h1>
+            </div>
+            
+            <!-- Seletor de Usuário Ativo -->
+            <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+                    <i class="fa-solid fa-user-tie text-indigo-600 text-sm"></i>
+                    <span class="text-xs font-medium text-slate-600">Usuário:</span>
+                    <select id="usuarioAtivo" onchange="mudarUsuario()" class="bg-transparent font-bold text-slate-800 text-sm focus:outline-hidden cursor-pointer">
+                        <option value="Levi">Levi</option>
+                        <option value="Selma">Selma</option>
+                        <option value="Ariany">Ariany</option>
+                    </select>
+                </div>
+                <button onclick="abrirModalNovoCliente()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Novo Cliente</span>
+                </button>
+                <button onclick="carregarClientes()" id="btnAtualizar" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 p-2 rounded-lg text-sm transition" title="Atualizar dados">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Metric Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Clientes de <span id="labelUserStat" class="text-indigo-600 font-bold">Levi</span></p>
+                    <h4 id="statTotal" class="text-2xl font-bold text-slate-900 mt-1">0</h4>
+                </div>
+                <div class="bg-blue-50 text-blue-600 p-3 rounded-xl">
+                    <i class="fa-solid fa-users text-xl"></i>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Leads Ativos</p>
+                    <h4 id="statLeads" class="text-2xl font-bold text-slate-900 mt-1">0</h4>
+                </div>
+                <div class="bg-amber-50 text-amber-600 p-3 rounded-xl">
+                    <i class="fa-solid fa-bullseye text-xl"></i>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Em Negociação</p>
+                    <h4 id="statNegociacao" class="text-2xl font-bold text-slate-900 mt-1">0</h4>
+                </div>
+                <div class="bg-purple-50 text-purple-600 p-3 rounded-xl">
+                    <i class="fa-solid fa-handshake text-xl"></i>
+                </div>
+            </div>
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Fechados</p>
+                    <h4 id="statFechado" class="text-2xl font-bold text-slate-900 mt-1">0</h4>
+                </div>
+                <div class="bg-emerald-50 text-emerald-600 p-3 rounded-xl">
+                    <i class="fa-solid fa-circle-check text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filters Toolbar -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="relative w-full sm:w-96">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="inputBusca" onkeyup="filtrarClientes()" placeholder="Pesquisar por nome, projeto ou bairro..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+            </div>
+            <div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
+                <select id="filtroStatus" onchange="filtrarClientes()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                    <option value="">Todos os Status</option>
+                    <option value="Lead">Lead</option>
+                    <option value="Em Negociação">Em Negociação</option>
+                    <option value="Fechado">Fechado</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Table Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <th class="py-3 px-6">Cliente / Projeto</th>
+                            <th class="py-3 px-6">Contato</th>
+                            <th class="py-3 px-6">Localização (Bairro / Zona)</th>
+                            <th class="py-3 px-6">Valor Estimado</th>
+                            <th class="py-3 px-6">Status</th>
+                            <th class="py-3 px-6 text-right">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaClientes" class="divide-y divide-slate-100 text-sm">
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-slate-400">
+                                <i class="fa-solid fa-spinner fa-spin mr-2"></i> Carregando dados da aba correspondente...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Novo Cliente -->
+    <div id="modalCliente" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-100 transform transition-all">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 class="font-bold text-slate-900 text-base">Novo Registro para <span id="modalUsuarioNome" class="text-indigo-600">Levi</span></h3>
+                <button onclick="fecharModal()" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="formCliente" onsubmit="salvarCliente(event)" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Nome *</label>
+                        <input type="text" id="nome" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">E-mail *</label>
+                        <input type="email" id="email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Telefone</label>
+                        <input type="text" id="telefone" placeholder="(00) 00000-0000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Projeto</label>
+                        <input type="text" id="projeto" placeholder="Ex: Reforma, Compra..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Valor Estimado (R$)</label>
+                        <input type="text" id="valorEstimado" placeholder="0,00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Bairro</label>
+                        <input type="text" id="bairro" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Zona</label>
+                        <input type="text" id="zona" placeholder="Ex: Sul, Norte..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Status</label>
+                    <select id="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                        <option value="Lead">Lead</option>
+                        <option value="Em Negociação">Em Negociação</option>
+                        <option value="Fechado">Fechado</option>
+                    </select>
+                </div>
+                <div class="pt-4 flex items-center justify-end space-x-3">
+                    <button type="button" onclick="fecharModal()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl text-sm font-medium transition">Cancelar</button>
+                    <button type="submit" id="btnSalvar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition shadow-sm">Salvar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript da Aplicação -->
+    <script>
+        // URL da API do Google Apps Script embutida diretamente
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwUgq9SejA0R0BzHRkYJMBlbfELyewPyhlifpuJ3bLQ-FdBl8cXWNmOERbAu8H-XGrk/exec";
+        let usuarioAtual = localStorage.getItem('crm_usuario_ativo') || "Levi";
+        let listaClientes = [];
+
+        window.onload = function() {
+            document.getElementById('usuarioAtivo').value = usuarioAtual;
+            document.getElementById('labelUserStat').innerText = usuarioAtual;
+            document.getElementById('modalUsuarioNome').innerText = usuarioAtual;
+            carregarClientes();
+        };
+
+        function mudarUsuario() {
+            usuarioAtual = document.getElementById('usuarioAtivo').value;
+            localStorage.setItem('crm_usuario_ativo', usuarioAtual);
+            document.getElementById('labelUserStat').innerText = usuarioAtual;
+            document.getElementById('modalUsuarioNome').innerText = usuarioAtual;
+            document.getElementById('inputBusca').value = "";
+            document.getElementById('filtroStatus').value = "";
+            carregarClientes();
+        }
+
+        async function carregarClientes() {
+            const btn = document.getElementById('btnAtualizar');
+            btn.classList.add('fa-spin');
+            
+            try {
+                let resposta = await fetch(WEB_APP_URL + '?aba=' + encodeURIComponent(usuarioAtual));
+                let dados = await resposta.json();
+                listaClientes = dados;
+                renderizarTabela(listaClientes);
+                atualizarMetricas(listaClientes);
+            } catch (erro) {
+                console.error("Erro ao carregar dados:", erro);
+                document.getElementById('tabelaClientes').innerHTML = '<tr><td colspan="6" class="py-8 text-center text-rose-500"><i class="fa-solid fa-circle-exclamation mr-1"></i> Erro ao carregar dados da aba ' + usuarioAtual + '. Verifique se a aba existe na planilha.</td></tr>';
+            } finally {
+                btn.classList.remove('fa-spin');
+            }
+        }
+
+        function renderizarTabela(dados) {
+            const tabela = document.getElementById('tabelaClientes');
+            tabela.innerHTML = "";
+
+            if (dados.length === 0) {
+                tabela.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-400">Nenhum registro cadastrado para ' + usuarioAtual + '.</td></tr>';
+                return;
+            }
+
+            dados.forEach((cliente) => {
+                let badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
+                if (cliente.Status === 'Em Negociação') badgeClass = "bg-purple-50 text-purple-700 border-purple-200";
+                if (cliente.Status === 'Fechado') badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+
+                let linha = '<tr class="hover:bg-slate-50/80 transition">' +
+                    '<td class="py-4 px-6">' +
+                        '<div class="font-semibold text-slate-900">' + (cliente.Nome || '') + '</div>' +
+                        '<div class="text-xs text-slate-500"><i class="fa-solid fa-diagram-project mr-1"></i>' + (cliente.Projeto || 'Sem projeto') + '</div>' +
+                    '</td>' +
+                    '<td class="py-4 px-6">' +
+                        '<div class="text-slate-700">' + (cliente.Email || '') + '</div>' +
+                        '<div class="text-xs text-slate-500">' + (cliente.Telefone || '') + '</div>' +
+                    '</td>' +
+                    '<td class="py-4 px-6">' +
+                        '<div class="text-slate-800 text-xs font-medium">' + (cliente.Bairro || '-') + '</div>' +
+                        '<div class="text-xs text-slate-500">Zona: ' + (cliente.Zona || '-') + '</div>' +
+                    '</td>' +
+                    '<td class="py-4 px-6 font-semibold text-slate-700 text-xs">' +
+                        'R$ ' + (cliente.ValorEstimado || '0,00') +
+                    '</td>' +
+                    '<td class="py-4 px-6">' +
+                        '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ' + badgeClass + '">' +
+                            (cliente.Status || 'Lead') +
+                        '</span>' +
+                    '</td>' +
+                    '<td class="py-4 px-6 text-right space-x-2">' +
+                        '<button onclick="copiarDetalhes(\'' + cliente.Nome + '\', \'' + cliente.Email + '\', \'' + cliente.Telefone + '\', \'' + cliente.Projeto + '\')" class="text-slate-400 hover:text-indigo-600 transition" title="Copiar contato">' +
+                            '<i class="fa-solid fa-copy"></i>' +
+                        '</button>' +
+                    '</td>' +
+                '</tr>';
+                tabela.innerHTML += linha;
+            });
+        }
+
+        function atualizarMetricas(dados) {
+            document.getElementById('statTotal').innerText = dados.length;
+            document.getElementById('statLeads').innerText = dados.filter(c => c.Status === 'Lead').length;
+            document.getElementById('statNegociacao').innerText = dados.filter(c => c.Status === 'Em Negociação').length;
+            document.getElementById('statFechado').innerText = dados.filter(c => c.Status === 'Fechado').length;
+        }
+
+        function filtrarClientes() {
+            let busca = document.getElementById('inputBusca').value.toLowerCase();
+            let statusFiltro = document.getElementById('filtroStatus').value;
+
+            let filtrados = listaClientes.filter(cliente => {
+                let nome = (cliente.Nome || '').toLowerCase();
+                let projeto = (cliente.Projeto || '').toLowerCase();
+                let bairro = (cliente.Bairro || '').toLowerCase();
+                let email = (cliente.Email || '').toLowerCase();
+                
+                let matchBusca = nome.includes(busca) || projeto.includes(busca) || bairro.includes(busca) || email.includes(busca);
+                let matchStatus = statusFiltro === "" || cliente.Status === statusFiltro;
+
+                return matchBusca && matchStatus;
+            });
+
+            renderizarTabela(filtrados);
+        }
+
+        function abrirModalNovoCliente() {
+            document.getElementById('formCliente').reset();
+            document.getElementById('modalCliente').classList.remove('hidden');
+        }
+
+        function fecharModal() {
+            document.getElementById('modalCliente').classList.add('hidden');
+        }
+
+        async function salvarCliente(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btnSalvar');
+            btn.innerText = "Salvando...";
+            btn.disabled = true;
+
+            const dadosCliente = {
+                aba: usuarioAtual,
+                nome: document.getElementById('nome').value,
+                email: document.getElementById('email').value,
+                telefone: document.getElementById('telefone').value,
+                projeto: document.getElementById('projeto').value,
+                valorEstimado: document.getElementById('valorEstimado').value,
+                bairro: document.getElementById('bairro').value,
+                zona: document.getElementById('zona').value,
+                status: document.getElementById('status').value
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dadosCliente)
+                });
+
+                fecharModal();
+                alert('Registro salvo com sucesso na aba de ' + usuarioAtual + '!');
+                setTimeout(carregarClientes, 1500);
+            } catch (erro) {
+                console.error(erro);
+                alert("Erro ao salvar dados.");
+            } finally {
+                btn.innerText = "Salvar Registro";
+                btn.disabled = false;
+            }
+        }
+
+        function copiarDetalhes(nome, email, telefone, projeto) {
+            let texto = 'Nome: ' + nome + '\nProjeto: ' + projeto + '\nE-mail: ' + email + '\nTelefone: ' + telefone;
+            navigator.clipboard.writeText(texto);
+            alert("Dados copiados para a área de transferência!");
+        }
+    </script>
+</body>
+</html>
