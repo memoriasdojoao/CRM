@@ -217,14 +217,14 @@
             btn.classList.add('fa-spin');
             
             try {
-                let resposta = await fetch(WEB_APP_URL + '?aba=' + encodeURIComponent(usuarioAtual));
+                let resposta = await fetch(`${WEB_APP_URL}?aba=${encodeURIComponent(usuarioAtual)}`);
                 let dados = await resposta.json();
                 listaClientes = dados;
                 renderizarTabela(listaClientes);
                 atualizarMetricas(listaClientes);
             } catch (erro) {
                 console.error("Erro ao carregar dados:", erro);
-                document.getElementById('tabelaClientes').innerHTML = '<tr><td colspan="6" class="py-8 text-center text-rose-500"><i class="fa-solid fa-circle-exclamation mr-1"></i> Erro ao carregar dados da aba ' + usuarioAtual + '. Verifique se a aba existe na planilha.</td></tr>';
+                document.getElementById('tabelaClientes').innerHTML = `<tr><td colspan="6" class="py-8 text-center text-rose-500"><i class="fa-solid fa-circle-exclamation mr-1"></i> Erro ao carregar dados da aba ${usuarioAtual}. Verifique se a aba existe na planilha.</td></tr>`;
             } finally {
                 btn.classList.remove('fa-spin');
             }
@@ -235,7 +235,7 @@
             tabela.innerHTML = "";
 
             if (dados.length === 0) {
-                tabela.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-400">Nenhum registro cadastrado para ' + usuarioAtual + '.</td></tr>';
+                tabela.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Nenhum registro cadastrado para ${usuarioAtual}.</td></tr>`;
                 return;
             }
 
@@ -243,34 +243,41 @@
                 let badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
                 if (cliente.Status === 'Em Negociação') badgeClass = "bg-purple-50 text-purple-700 border-purple-200";
                 if (cliente.Status === 'Fechado') badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                
+                // Evitar erro de aspas ao passar para a função
+                const nomeSeguro = (cliente.Nome || '').replace(/'/g, "\'");
+                const emailSeguro = (cliente.Email || '').replace(/'/g, "\'");
+                const telefoneSeguro = (cliente.Telefone || '').replace(/'/g, "\'");
+                const projetoSeguro = (cliente.Projeto || '').replace(/'/g, "\'");
 
-                let linha = '<tr class="hover:bg-slate-50/80 transition">' +
-                    '<td class="py-4 px-6">' +
-                        '<div class="font-semibold text-slate-900">' + (cliente.Nome || '') + '</div>' +
-                        '<div class="text-xs text-slate-500"><i class="fa-solid fa-diagram-project mr-1"></i>' + (cliente.Projeto || 'Sem projeto') + '</div>' +
-                    '</td>' +
-                    '<td class="py-4 px-6">' +
-                        '<div class="text-slate-700">' + (cliente.Email || '') + '</div>' +
-                        '<div class="text-xs text-slate-500">' + (cliente.Telefone || '') + '</div>' +
-                    '</td>' +
-                    '<td class="py-4 px-6">' +
-                        '<div class="text-slate-800 text-xs font-medium">' + (cliente.Bairro || '-') + '</div>' +
-                        '<div class="text-xs text-slate-500">Zona: ' + (cliente.Zona || '-') + '</div>' +
-                    '</td>' +
-                    '<td class="py-4 px-6 font-semibold text-slate-700 text-xs">' +
-                        'R$ ' + (cliente.ValorEstimado || '0,00') +
-                    '</td>' +
-                    '<td class="py-4 px-6">' +
-                        '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ' + badgeClass + '">' +
-                            (cliente.Status || 'Lead') +
-                        '</span>' +
-                    '</td>' +
-                    '<td class="py-4 px-6 text-right space-x-2">' +
-                        '<button onclick="copiarDetalhes('' + cliente.Nome + '', '' + cliente.Email + '', '' + cliente.Telefone + '', '' + cliente.Projeto + '')" class="text-slate-400 hover:text-indigo-600 transition" title="Copiar contato">' +
-                            '<i class="fa-solid fa-copy"></i>' +
-                        '</button>' +
-                    '</td>' +
-                '</tr>';
+                let linha = `
+                <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-4 px-6">
+                        <div class="font-semibold text-slate-900">${cliente.Nome || ''}</div>
+                        <div class="text-xs text-slate-500"><i class="fa-solid fa-diagram-project mr-1"></i>${cliente.Projeto || 'Sem projeto'}</div>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="text-slate-700">${cliente.Email || ''}</div>
+                        <div class="text-xs text-slate-500">${cliente.Telefone || ''}</div>
+                    </td>
+                    <td class="py-4 px-6">
+                        <div class="text-slate-800 text-xs font-medium">${cliente.Bairro || '-'}</div>
+                        <div class="text-xs text-slate-500">Zona: ${cliente.Zona || '-'}</div>
+                    </td>
+                    <td class="py-4 px-6 font-semibold text-slate-700 text-xs">
+                        R$ ${cliente.ValorEstimado || '0,00'}
+                    </td>
+                    <td class="py-4 px-6">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${badgeClass}">
+                            ${cliente.Status || 'Lead'}
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-2">
+                        <button onclick="copiarDetalhes('${nomeSeguro}', '${emailSeguro}', '${telefoneSeguro}', '${projetoSeguro}')" class="text-slate-400 hover:text-indigo-600 transition" title="Copiar contato">
+                            <i class="fa-solid fa-copy"></i>
+                        </button>
+                    </td>
+                </tr>`;
                 tabela.innerHTML += linha;
             });
         }
@@ -337,7 +344,7 @@
                 });
 
                 fecharModal();
-                alert('Registro salvo com sucesso na aba de ' + usuarioAtual + '!');
+                alert(`Registro salvo com sucesso na aba de ${usuarioAtual}!`);
                 setTimeout(carregarClientes, 1500);
             } catch (erro) {
                 console.error(erro);
@@ -349,7 +356,7 @@
         }
 
         function copiarDetalhes(nome, email, telefone, projeto) {
-            let texto = 'Nome: ' + nome + '\nProjeto: ' + projeto + '\nE-mail: ' + email + '\nTelefone: ' + telefone;
+            let texto = `Nome: ${nome}\nProjeto: ${projeto}\nE-mail: ${email}\nTelefone: ${telefone}`;
             navigator.clipboard.writeText(texto);
             alert("Dados copiados para a área de transferência!");
         }
