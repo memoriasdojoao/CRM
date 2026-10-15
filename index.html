@@ -9,7 +9,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CRM Santos">
-    <!-- Ícone base64 para evitar dependências externas (um ícone azul com a letra S) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234F46E5'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%234F46E5'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
     
@@ -45,7 +44,7 @@
             <!-- Perfis injetados via JS -->
         </div>
 
-        <!-- Modal de Senha -->
+        <!-- Modal de Senha Perfil -->
         <div id="passwordModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm transform transition-all text-center">
                 <img id="loginAvatar" src="" class="w-16 h-16 rounded-full mx-auto border-4 border-indigo-100 shadow-sm mb-4 object-cover">
@@ -59,6 +58,24 @@
                 <div class="flex space-x-3">
                     <button onclick="closePasswordModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-sm font-semibold transition">Cancelar</button>
                     <button onclick="tryLogin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow-md">Entrar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Senha Admin (Secreto) -->
+        <div id="adminPasswordModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[55]">
+            <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-6 w-full max-w-sm transform transition-all text-center">
+                <div class="text-amber-400 mb-4 text-3xl"><i class="fa-solid fa-lock"></i></div>
+                <h3 class="text-lg font-bold text-white mb-1">Acesso Restrito</h3>
+                <p class="text-sm text-slate-400 mb-6">Insira a chave de administrador</p>
+                
+                <input type="password" id="inputAdminPassword" class="w-full bg-slate-900 border border-slate-600 text-white rounded-xl px-4 py-3 text-center text-lg tracking-widest focus:bg-slate-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition mb-4" placeholder="••••••••" onkeyup="if(event.key === 'Enter') checkAdminPassword()">
+                
+                <p id="adminError" class="text-rose-400 text-xs font-semibold mb-4 hidden">Acesso negado!</p>
+                
+                <div class="flex space-x-3">
+                    <button onclick="closeAdminPasswordModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-xl text-sm font-semibold transition">Cancelar</button>
+                    <button onclick="checkAdminPassword()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 py-2.5 rounded-xl text-sm font-bold transition shadow-md">Verificar</button>
                 </div>
             </div>
         </div>
@@ -326,25 +343,37 @@
         // ======= CONFIGURAÇÕES GERAIS =======
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWEgRAYuGBJ6Wbpdf7MjwpS3-iqwdldHqCAFteYLOS8ONpm_V-rZwdoozeCULuMFrc/exec";
         
-        // Dados Padrão (serão sobrescritos pelo LocalStorage se existirem)
+        // A SENHA DO ADMIN É: @Levi1611
+        // Obfuscada (Base64) para não aparecer limpa no GitHub Público:
+        const ADMIN_HASH = "QExldmkxNjEx";
+
+        // Senhas Iniciais Obfuscadas (Base64):
+        // user1 (Levi) -> levi1611 -> bGV2aTE2MTE=
+        // user2 (Selma) -> selma1611 -> c2VsbWExNjEx
+        // user3 (Ariany) -> ariany1611 -> YXJpYW55MTYxMQ==
         const defaultProfiles = {
-            user1: { id: 'user1', name: 'Levi', pass: '123', photo: 'https://ui-avatars.com/api/?name=Levi&background=E0E7FF&color=3730A3&bold=true' },
-            user2: { id: 'user2', name: 'Selma', pass: '123', photo: 'https://ui-avatars.com/api/?name=Selma&background=FCE7F3&color=9D174D&bold=true' },
-            user3: { id: 'user3', name: 'Ariany', pass: '123', photo: 'https://ui-avatars.com/api/?name=Ariany&background=D1FAE5&color=065F46&bold=true' }
+            user1: { id: 'user1', name: 'Levi', passHash: 'bGV2aTE2MTE=', photo: 'https://ui-avatars.com/api/?name=Levi&background=E0E7FF&color=3730A3&bold=true' },
+            user2: { id: 'user2', name: 'Selma', passHash: 'c2VsbWExNjEx', photo: 'https://ui-avatars.com/api/?name=Selma&background=FCE7F3&color=9D174D&bold=true' },
+            user3: { id: 'user3', name: 'Ariany', passHash: 'YXJpYW55MTYxMQ==', photo: 'https://ui-avatars.com/api/?name=Ariany&background=D1FAE5&color=065F46&bold=true' }
         };
 
         let profiles = JSON.parse(localStorage.getItem('crm_santos_profiles')) || defaultProfiles;
-        let activeUserId = localStorage.getItem('crm_santos_activeUser');
+        let activeUserId = null;
         let listaClientes = [];
         let clientesFiltrados = [];
         let secretClicks = 0;
 
-        // ======= INICIALIZAÇÃO =======
+        // ======= INICIALIZAÇÃO E SESSÃO (3 DIAS) =======
         window.onload = function() {
-            if(activeUserId && profiles[activeUserId]) {
-                iniciarSessao(activeUserId);
+            let storedUser = localStorage.getItem('crm_santos_activeUser');
+            let sessionExpiry = localStorage.getItem('crm_santos_session_expiry');
+            let now = new Date().getTime();
+
+            // Verifica se tem usuario salvo E se a sessão ainda está válida (dentro dos 3 dias)
+            if(storedUser && profiles[storedUser] && sessionExpiry && now < parseInt(sessionExpiry)) {
+                iniciarSessao(storedUser, false); // Inicia sem renovar os 3 dias pra manter o vencimento original
             } else {
-                renderLoginScreen();
+                logout(); // Limpa e manda pro login
             }
         };
 
@@ -388,17 +417,24 @@
 
         function tryLogin() {
             const pass = document.getElementById('inputPassword').value;
-            if(profiles[tempAttemptUser].pass === pass) {
+            // Codifica a entrada para comparar com o hash(base64) salvo
+            if(btoa(pass) === profiles[tempAttemptUser].passHash) {
                 closePasswordModal();
-                iniciarSessao(tempAttemptUser);
+                iniciarSessao(tempAttemptUser, true); // true = novo login (gera 3 dias)
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
         }
 
-        function iniciarSessao(userId) {
+        function iniciarSessao(userId, novoLogin) {
             activeUserId = userId;
             localStorage.setItem('crm_santos_activeUser', activeUserId);
+            
+            // Se for um login novo, define a validade para 3 dias a partir de agora
+            if(novoLogin) {
+                let expireTime = new Date().getTime() + (3 * 24 * 60 * 60 * 1000);
+                localStorage.setItem('crm_santos_session_expiry', expireTime.toString());
+            }
             
             const user = profiles[activeUserId];
             document.getElementById('labelUserStat').innerText = user.name;
@@ -412,6 +448,7 @@
 
         function logout() {
             localStorage.removeItem('crm_santos_activeUser');
+            localStorage.removeItem('crm_santos_session_expiry');
             activeUserId = null;
             listaClientes = [];
             renderLoginScreen();
@@ -438,15 +475,35 @@
             return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // ======= SECRET CONFIG MODAL =======
+        // ======= SECRET CONFIG MODAL (ADMIN) =======
         function logoSecretClick() {
             secretClicks++;
             if(secretClicks >= 5) {
                 secretClicks = 0;
-                openConfigModal();
+                openAdminPasswordModal();
             }
-            // reseta contador depois de 2 segundos se não clicar rapido
             setTimeout(() => { secretClicks = 0; }, 2000);
+        }
+
+        function openAdminPasswordModal() {
+            document.getElementById('inputAdminPassword').value = '';
+            document.getElementById('adminError').classList.add('hidden');
+            document.getElementById('adminPasswordModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('inputAdminPassword').focus(), 100);
+        }
+
+        function closeAdminPasswordModal() {
+            document.getElementById('adminPasswordModal').classList.add('hidden');
+        }
+
+        function checkAdminPassword() {
+            const pass = document.getElementById('inputAdminPassword').value;
+            if(btoa(pass) === ADMIN_HASH) {
+                closeAdminPasswordModal();
+                openConfigModal();
+            } else {
+                document.getElementById('adminError').classList.remove('hidden');
+            }
         }
 
         function openConfigModal() {
@@ -454,6 +511,10 @@
             container.innerHTML = '';
             
             Object.values(profiles).forEach((p, idx) => {
+                // Decodifica a senha apenas para mostrar pro Admin editar
+                let decodedPass = "";
+                try { decodedPass = atob(p.passHash); } catch(e) { decodedPass = ""; }
+                
                 container.innerHTML += `
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <h4 class="font-bold text-slate-800 mb-3 text-sm flex items-center"><i class="fa-solid fa-user-gear mr-2 text-indigo-500"></i> Perfil ${idx+1}</h4>
@@ -467,8 +528,8 @@
                                 <input type="text" id="cfg_photo_${p.id}" value="${p.photo}" class="w-full text-xs px-3 py-2 border rounded-lg mt-1 text-slate-500" placeholder="https://link-da-imagem.com/foto.jpg">
                             </div>
                             <div>
-                                <label class="text-[10px] font-bold text-slate-500 uppercase">Senha</label>
-                                <input type="text" id="cfg_pass_${p.id}" value="${p.pass}" class="w-full text-sm px-3 py-2 border rounded-lg mt-1">
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Nova Senha</label>
+                                <input type="text" id="cfg_pass_${p.id}" value="${decodedPass}" class="w-full text-sm px-3 py-2 border rounded-lg mt-1">
                             </div>
                         </div>
                     </div>
@@ -486,7 +547,9 @@
             Object.values(profiles).forEach(p => {
                 p.name = document.getElementById(`cfg_name_${p.id}`).value;
                 p.photo = document.getElementById(`cfg_photo_${p.id}`).value || `https://ui-avatars.com/api/?name=${p.name}`;
-                p.pass = document.getElementById(`cfg_pass_${p.id}`).value;
+                // Codifica e salva a nova senha para não ficar legível no LocalStorage/Código
+                const novaSenha = document.getElementById(`cfg_pass_${p.id}`).value;
+                p.passHash = btoa(novaSenha); 
             });
             localStorage.setItem('crm_santos_profiles', JSON.stringify(profiles));
             closeConfigModal();
@@ -533,14 +596,10 @@
             let valorRange = document.getElementById('filtroValor').value;
 
             clientesFiltrados = listaClientes.filter(c => {
-                // Filtro Texto
                 let textMatch = (c.Nome.toLowerCase().includes(busca) || c.Projeto.toLowerCase().includes(busca) || c.Email.toLowerCase().includes(busca) || c.Tratativa.toLowerCase().includes(busca));
-                
-                // Filtro Status & Zona
                 let statusMatch = status === "" || c.Status === status;
                 let zonaMatch = zona === "" || c.Zona === zona;
                 
-                // Filtro Valores
                 let numValor = extrairNumero(c.ValorEstimado);
                 let valorMatch = true;
                 if(valorRange === "1") valorMatch = (numValor <= 300000);
@@ -570,7 +629,7 @@
                 if (cliente.Status === 'Fechado') badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
                 
                 let valorFmt = formatarMoedaView(cliente.ValorEstimado);
-                let realIndex = listaClientes.indexOf(cliente); // Pegar idx do array original pra editar correto
+                let realIndex = listaClientes.indexOf(cliente);
 
                 let linha = `
                 <tr class="hover:bg-slate-50 transition border-b border-slate-100 last:border-0 group cursor-pointer" onclick="editarCliente(${realIndex}, event)">
