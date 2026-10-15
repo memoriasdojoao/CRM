@@ -26,7 +26,7 @@
     <!-- TELA DE LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-gradient-to-br from-slate-900 to-indigo-950 z-50 flex flex-col items-center justify-center p-4">
         <div class="mb-10 text-center flex flex-col items-center">
-            <div class="cursor-pointer select-none" onclick="logoSecretClick()" title="CRM Santos">
+            <div class="select-none" title="CRM Santos">
                 <svg class="w-20 h-20 mb-4 text-white hover:scale-105 transition-transform" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect width="100" height="100" rx="24" fill="currentColor" fill-opacity="0.1"/>
                     <path d="M70 35H30C27.2386 35 25 37.2386 25 40V70C25 72.7614 27.2386 75 30 75H70C72.7614 75 75 72.7614 75 70V40C75 37.2386 72.7614 35 70 35Z" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -34,7 +34,7 @@
                     <path d="M50 55C52.7614 55 55 52.7614 55 50C55 47.2386 52.7614 45 50 45C47.2386 45 45 47.2386 45 50C45 52.7614 47.2386 55 50 55Z" fill="white"/>
                 </svg>
             </div>
-            <h1 class="text-3xl font-extrabold tracking-tight text-white cursor-pointer select-none" onclick="logoSecretClick()">
+            <h1 class="text-3xl font-extrabold tracking-tight text-white cursor-pointer select-none" >
                 CRM <span class="text-indigo-400">Santos</span>
             </h1>
             <p class="text-indigo-200 mt-2 text-sm font-medium">Selecione seu perfil para entrar</p>
@@ -57,27 +57,14 @@
             </div>
         </div>
 
-        <!-- MODAL AUTENTICAÇÃO ADMIN -->
-        <div id="adminPasswordModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[55]">
-            <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-6 w-full max-w-sm transform transition-all text-center">
-                <div class="text-amber-400 mb-4 text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
-                <h3 class="text-lg font-bold text-white mb-1">Acesso Restrito Admin</h3>
-                <p class="text-sm text-slate-400 mb-6">Insira a chave mestra de administrador</p>
-                <input type="password" id="inputAdminPassword" class="w-full bg-slate-900 border border-slate-600 text-white rounded-xl px-4 py-3 text-center text-lg tracking-widest focus:bg-slate-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition mb-4" placeholder="••••••••" onkeyup="if(event.key === 'Enter') checkAdminPassword()">
-                <p id="adminError" class="text-rose-400 text-xs font-semibold mb-4 hidden">Chave incorreta!</p>
-                <div class="flex space-x-3">
-                    <button onclick="closeAdminPasswordModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-xl text-sm font-semibold transition">Cancelar</button>
-                    <button onclick="checkAdminPassword()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 py-2.5 rounded-xl text-sm font-bold transition shadow-md">Acessar</button>
-                </div>
-            </div>
-        </div>
+        
     </div>
 
     <!-- TELA PRINCIPAL -->
     <div id="mainApp" class="hidden">
         <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm glass-card">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="logoSecretClick()">
+                <div class="flex items-center space-x-3 cursor-pointer select-none" >
                     <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-sm">
                         <svg class="w-6 h-6" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect width="100" height="100" rx="20" fill="transparent"/>
@@ -92,10 +79,7 @@
                 </div>
                 
                 <div class="flex items-center space-x-2 sm:space-x-3">
-                    <!-- Botão Config / Apps Script -->
-                    <button onclick="abrirAdminModal()" class="bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 p-2 rounded-xl text-sm transition shadow-sm" title="Configurações & Google Apps Script">
-                        <i class="fa-solid fa-code text-slate-600"></i>
-                    </button>
+                    
 
                     <!-- Perfil Atual / Logout -->
                     <div class="flex items-center space-x-2 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 cursor-pointer transition shadow-sm" title="Trocar de Conta / Sair" onclick="logout()">
@@ -324,151 +308,10 @@
         </div>
     </div>
 
-    <!-- MODAL PAINEL ADMIN & CÓDIGO APPS SCRIPT -->
-    <div id="adminPanelModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
-        <div class="bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 max-w-3xl w-full max-h-[90vh] overflow-y-auto hide-scroll text-slate-200 p-6">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-gears"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-lg font-bold text-white">Configuração & Integração</h3>
-                        <p class="text-xs text-slate-400">Sincronização bidirecional com Google Sheets</p>
-                    </div>
-                </div>
-                <button onclick="fecharAdminModal()" class="text-slate-400 hover:text-white text-xl">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4 text-sm">
-                <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/60">
-                    <h4 class="font-bold text-amber-400 mb-1 flex items-center gap-2">
-                        <i class="fa-solid fa-circle-check"></i> Correção Definitiva na Planilha Google
-                    </h4>
-                    <p class="text-xs text-slate-300 leading-relaxed">
-                        O CRM Santos agora possui <strong>deduplicação inteligente e cache local</strong>: mesmo se a planilha tiver linhas repetidas ou antigas, ele <strong>sempre edita no mesmo registro</strong> e <strong>exclui de fato</strong> sem criar duplicatas.
-                    </p>
-                    <p class="text-xs text-slate-400 mt-2">
-                        Para que as linhas sejam editadas e excluídas <strong>também fisicamente dentro do Google Sheets</strong>, cole o código abaixo no Apps Script da sua planilha:
-                    </p>
-                </div>
-
-                <div class="relative">
-                    <div class="flex items-center justify-between bg-slate-950 px-4 py-2 rounded-t-xl border border-slate-800 text-xs text-slate-400">
-                        <span>Código do Google Apps Script (Código.gs)</span>
-                        <button onclick="copiarCodigoAppsScript()" class="text-indigo-400 hover:text-indigo-300 font-bold flex items-center gap-1.5">
-                            <i class="fa-regular fa-copy"></i> Copiar Código
-                        </button>
-                    </div>
-                    <pre id="codigoAppsScript" class="bg-slate-950/90 text-slate-300 p-4 rounded-b-xl border-x border-b border-slate-800 text-xs font-mono overflow-x-auto max-h-56 leading-relaxed select-all">function doGet(e) {
-  try {
-    var sheetName = (e && e.parameter && e.parameter.aba) ? e.parameter.aba : "Levi";
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName(sheetName);
-    if (!sheet) {
-      sheet = ss.insertSheet(sheetName);
-      sheet.appendRow(["Data", "Nome", "Email", "Telefone", "Projeto", "Valor estimado", "Bairro", "Zona", "Status", "Tratativa"]);
-      return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
-    }
-    var data = sheet.getDataRange().getValues();
-    if (data.length <= 1) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
-    var headers = data[0];
-    var resultado = [];
-    for (var i = 1; i < data.length; i++) {
-      var row = data[i];
-      var nome = row[1] ? String(row[1]).trim() : "";
-      if (!nome) continue;
-      var obj = {};
-      for (var j = 0; j < headers.length; j++) {
-        var val = row[j];
-        if (val instanceof Date) val = val.toISOString();
-        obj[headers[j]] = (val !== null && val !== undefined) ? String(val) : "";
-      }
-      resultado.push(obj);
-    }
-    return ContentService.createTextOutput(JSON.stringify(resultado)).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ error: err.toString() })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-function doPost(e) {
-  try {
-    var postData = (e && e.postData && e.postData.contents) ? e.postData.contents : "{}";
-    var dados = JSON.parse(postData);
-    var sheetName = dados.aba || "Levi";
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName(sheetName);
-    if (!sheet) {
-      sheet = ss.insertSheet(sheetName);
-      sheet.appendRow(["Data", "Nome", "Email", "Telefone", "Projeto", "Valor estimado", "Bairro", "Zona", "Status", "Tratativa"]);
-    }
-    var acao = dados.acao || "novo";
-    var dataRange = sheet.getDataRange();
-    var values = dataRange.getValues();
-
-    if (acao === "excluir") {
-      var targetNome = (dados.originalNome || dados.nome || "").trim().toLowerCase();
-      if (!targetNome) return ContentService.createTextOutput(JSON.stringify({ status: "erro" })).setMimeType(ContentService.MimeType.JSON);
-      for (var i = values.length - 1; i >= 1; i--) {
-        var rowNome = String(values[i][1] || "").trim().toLowerCase();
-        if (rowNome === targetNome) sheet.deleteRow(i + 1);
-      }
-      return ContentService.createTextOutput(JSON.stringify({ status: "sucesso", acao: "excluido" })).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    if (acao === "editar") {
-      var targetNome = (dados.originalNome || "").trim().toLowerCase();
-      var editado = false;
-      if (targetNome) {
-        for (var i = 1; i < values.length; i++) {
-          var rowNome = String(values[i][1] || "").trim().toLowerCase();
-          if (rowNome === targetNome) {
-            sheet.getRange(i + 1, 1, 1, 10).setValues([[
-              new Date(), dados.nome || "", dados.email || "", dados.telefone || "",
-              dados.projeto || "", dados.valorEstimado || "", dados.bairro || "",
-              dados.zona || "", dados.status || "Lead", dados.tratativa || ""
-            ]]);
-            editado = true;
-            break;
-          }
-        }
-      }
-      if (!editado) {
-        sheet.appendRow([new Date(), dados.nome || "", dados.email || "", dados.telefone || "", dados.projeto || "", dados.valorEstimado || "", dados.bairro || "", dados.zona || "", dados.status || "Lead", dados.tratativa || ""]);
-      }
-      return ContentService.createTextOutput(JSON.stringify({ status: "sucesso", acao: "editado" })).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    if (acao === "novo") {
-      sheet.appendRow([new Date(), dados.nome || "", dados.email || "", dados.telefone || "", dados.projeto || "", dados.valorEstimado || "", dados.bairro || "", dados.zona || "", dados.status || "Lead", dados.tratativa || ""]);
-      return ContentService.createTextOutput(JSON.stringify({ status: "sucesso", acao: "adicionado" })).setMimeType(ContentService.MimeType.JSON);
-    }
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "erro", erro: err.toString() })).setMimeType(ContentService.MimeType.JSON);
-  }
-}</pre>
-                </div>
-
-                <div class="flex items-center justify-between pt-2">
-                    <button onclick="limparCacheLocalComConfirmacao()" class="text-rose-400 hover:text-rose-300 text-xs font-semibold flex items-center gap-1.5">
-                        <i class="fa-solid fa-trash-arrow-up"></i> Limpar Cache Local & Histórico
-                    </button>
-                    <button onclick="fecharAdminModal()" class="bg-slate-700 hover:bg-slate-600 text-white px-5 py-2 rounded-xl text-xs font-bold transition">
-                        Fechar Painel
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Script JS do CRM -->
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWEgRAYuGBJ6Wbpdf7MjwpS3-iqwdldHqCAFteYLOS8ONpm_V-rZwdoozeCULuMFrc/exec";
-        const ADMIN_HASH = "QExldmkxNjEx"; // Senha Admin: @Levi1611
-
+        const WEB_APP_URL ="https://script.google.com/macros/s/AKfycbxWEgRAYuGBJ6Wbpdf7MjwpS3-iqwdldHqCAFteYLOS8ONpm_V-rZwdoozeCULuMFrc/exec";
+        
         
         function gerarAvatarSVG(nome) {
             let inicial = (nome || 'U').charAt(0).toUpperCase();
@@ -523,7 +366,7 @@ const defaultProfiles = {
             let sessionExpiry = localStorage.getItem('crm_santos_session_expiry');
             let now = new Date().getTime();
 
-            if(storedUser && storedUser !== "null" && profiles[storedUser] && sessionExpiry && now < parseInt(sessionExpiry)) {
+            if(storedUser && storedUser !=="null" && profiles[storedUser] && sessionExpiry && now < parseInt(sessionExpiry)) {
                 iniciarSessao(storedUser, false);
             } else {
                 logout();
@@ -646,71 +489,7 @@ const defaultProfiles = {
             return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // ==========================================
-        // CONTROLE DE ADMIN & SECRET CLICKS
-        // ==========================================
-        let secretClicks = 0;
-        let secretTimeout = null;
-        function logoSecretClick() {
-            secretClicks++;
-            clearTimeout(secretTimeout);
-            if(secretClicks >= 5) {
-                secretClicks = 0;
-                abrirAdminPasswordPrompt();
-            } else {
-                secretTimeout = setTimeout(() => { secretClicks = 0; }, 2000);
-            }
-        }
-
-        function abrirAdminModal() {
-            abrirAdminPasswordPrompt();
-        }
-
-        function abrirAdminPasswordPrompt() {
-            document.getElementById('inputAdminPassword').value = '';
-            document.getElementById('adminError').classList.add('hidden');
-            document.getElementById('adminPasswordModal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('inputAdminPassword').focus(), 100);
-        }
-
-        function closeAdminPasswordModal() {
-            document.getElementById('adminPasswordModal').classList.add('hidden');
-        }
-
-        function checkAdminPassword() {
-            const pass = document.getElementById('inputAdminPassword').value;
-            if(btoa(pass) === ADMIN_HASH) {
-                closeAdminPasswordModal();
-                document.getElementById('adminPanelModal').classList.remove('hidden');
-            } else {
-                document.getElementById('adminError').classList.remove('hidden');
-            }
-        }
-
-        function fecharAdminModal() {
-            document.getElementById('adminPanelModal').classList.add('hidden');
-        }
-
-        function copiarCodigoAppsScript() {
-            const code = document.getElementById('codigoAppsScript').innerText;
-            navigator.clipboard.writeText(code).then(() => {
-                mostrarToast("Código do Apps Script copiado!");
-            }).catch(() => {
-                mostrarToast("Selecione e copie o texto manualmente.");
-            });
-        }
-
-        // ==========================================
-        // GERENCIAMENTO DE EXCLUSÃO & CACHE LOCAL
-        // ==========================================
-        function getDeletedClients(userId) {
-            try {
-                let raw = localStorage.getItem(`crm_santos_deleted_${userId}`);
-                return raw ? JSON.parse(raw) : [];
-            } catch(e) {
-                return [];
-            }
-        }
+        
 
         function marcarClienteDeletado(userId, nome) {
             if(!nome) return;
@@ -752,7 +531,7 @@ const defaultProfiles = {
             if(!confirm("Deseja realmente limpar o cache local e restaurar a sincronização original com a planilha?")) return;
             localStorage.removeItem(`crm_santos_cache_${activeUserId}`);
             localStorage.removeItem(`crm_santos_deleted_${activeUserId}`);
-            fecharAdminModal();
+            
             mostrarToast("Cache limpo! Recarregando dados da planilha...");
             carregarClientes();
         }
@@ -847,8 +626,8 @@ const defaultProfiles = {
             let status = document.getElementById('filtroStatus').value;
             let zona = document.getElementById('filtroZona').value;
             
-            let rawMin = document.getElementById('filtroValorMin') ? document.getElementById('filtroValorMin').value.trim() : "";
-            let rawMax = document.getElementById('filtroValorMax') ? document.getElementById('filtroValorMax').value.trim() : "";
+            let rawMin = document.getElementById('filtroValorMin') ? document.getElementById('filtroValorMin').value.trim() :"";
+            let rawMax = document.getElementById('filtroValorMax') ? document.getElementById('filtroValorMax').value.trim() :"";
             let minValor = rawMin ? extrairNumero(rawMin) : null;
             let maxValor = rawMax ? extrairNumero(rawMax) : null;
 
@@ -859,8 +638,8 @@ const defaultProfiles = {
                     (c.Email || '').toLowerCase().includes(busca) || 
                     (c.Tratativa || '').toLowerCase().includes(busca)
                 );
-                let statusMatch = status === "" || c.Status === status;
-                let zonaMatch = zona === "" || c.Zona === zona;
+                let statusMatch = status ==="" || c.Status === status;
+                let zonaMatch = zona ==="" || c.Zona === zona;
                 
                 let numValor = extrairNumero(c.ValorEstimado);
                 let valorMatch = true;
@@ -881,14 +660,14 @@ const defaultProfiles = {
         function limparFiltroValor() {
             let inputMin = document.getElementById('filtroValorMin');
             let inputMax = document.getElementById('filtroValorMax');
-            if (inputMin) inputMin.value = "";
-            if (inputMax) inputMax.value = "";
+            if (inputMin) inputMin.value ="";
+            if (inputMax) inputMax.value ="";
             aplicarFiltros();
         }
 
         function renderizarTabela(dados) {
             const tabela = document.getElementById('tabelaClientes');
-            tabela.innerHTML = "";
+            tabela.innerHTML ="";
 
             if (dados.length === 0) {
                 tabela.innerHTML = `
@@ -902,9 +681,9 @@ const defaultProfiles = {
             }
 
             dados.forEach((cliente) => {
-                let badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
-                if (cliente.Status === 'Em Negociação') badgeClass = "bg-purple-50 text-purple-700 border-purple-200";
-                if (cliente.Status === 'Fechado') badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                let badgeClass ="bg-blue-50 text-blue-700 border-blue-200";
+                if (cliente.Status === 'Em Negociação') badgeClass ="bg-purple-50 text-purple-700 border-purple-200";
+                if (cliente.Status === 'Fechado') badgeClass ="bg-emerald-50 text-emerald-700 border-emerald-200";
                 
                 let valorFmt = formatarMoedaView(cliente.ValorEstimado);
                 let cleanPhone = (cliente.Telefone || '').replace(/\D/g, '');
@@ -977,12 +756,12 @@ const defaultProfiles = {
 
         function enviarEmailMassa() {
             if(clientesFiltrados.length === 0) {
-                mostrarToast("Nenhum cliente para enviar e-mail.", "erro");
+                mostrarToast("Nenhum cliente para enviar e-mail.","erro");
                 return;
             }
-            let emails = clientesFiltrados.map(c => c.Email).filter(e => e && e.trim() !== "").join(",");
-            if(emails === "") {
-                mostrarToast("Os clientes filtrados não possuem e-mail cadastrado.", "erro");
+            let emails = clientesFiltrados.map(c => c.Email).filter(e => e && e.trim() !=="").join(",");
+            if(emails ==="") {
+                mostrarToast("Os clientes filtrados não possuem e-mail cadastrado.","erro");
                 return;
             }
             window.location.href = `mailto:?bcc=${emails}&subject=Contato CRM Santos`;
@@ -990,23 +769,23 @@ const defaultProfiles = {
 
         function exportarPlanilha() {
             if(clientesFiltrados.length === 0) {
-                mostrarToast("Nenhum cliente para exportar.", "erro");
+                mostrarToast("Nenhum cliente para exportar.","erro");
                 return;
             }
-            let cabecalhos = ["Nome", "Email", "Telefone", "Projeto", "Valor Estimado", "Bairro", "Zona", "Status", "Tratativa"];
+            let cabecalhos = ["Nome","Email","Telefone","Projeto","Valor Estimado","Bairro","Zona","Status","Tratativa"];
             let linhasCsv = [cabecalhos.join(";")];
 
             clientesFiltrados.forEach(c => {
                 let linha = [
                     c.Nome, c.Email, c.Telefone, c.Projeto, c.ValorEstimado, c.Bairro, c.Zona, c.Status, 
-                    (c.Tratativa || "").replace(/\r?\n|\r/g, " ").replace(/;/g, ",") 
+                    (c.Tratativa ||"").replace(/\r?\n|\r/g,"").replace(/;/g,",") 
                 ].map(v => `"${(v || '').toString().replace(/"/g, '""')}"`).join(";");
                 linhasCsv.push(linha);
             });
 
             // Adiciona BOM UTF-8 (\uFEFF) para abrir com acentuação correta no Excel brasileiro
-            let conteudoCsv = "\uFEFF" + linhasCsv.join("\r\n");
-            let blob = new Blob([conteudoCsv], { type: "text/csv;charset=utf-8;" });
+            let conteudoCsv ="\uFEFF" + linhasCsv.join("\r\n");
+            let blob = new Blob([conteudoCsv], { type:"text/csv;charset=utf-8;" });
             let url = URL.createObjectURL(blob);
             let link = document.createElement("a");
             link.setAttribute("href", url);
@@ -1023,9 +802,9 @@ const defaultProfiles = {
         // ==========================================
         function abrirModalCliente() {
             document.getElementById('formCliente').reset();
-            document.getElementById('clienteId').value = "";
-            document.getElementById('originalNome').value = "";
-            document.getElementById('modalClienteTitulo').innerText = "Novo Registro";
+            document.getElementById('clienteId').value ="";
+            document.getElementById('originalNome').value ="";
+            document.getElementById('modalClienteTitulo').innerText ="Novo Registro";
             document.getElementById('btnExcluirModal').classList.add('hidden');
             document.getElementById('modalCliente').classList.remove('hidden');
             setTimeout(() => document.getElementById('nome').focus(), 100);
@@ -1049,7 +828,7 @@ const defaultProfiles = {
             let inputV = document.getElementById('valorEstimado');
             inputV.value = formatarValorParaInput(c.ValorEstimado);
 
-            document.getElementById('modalClienteTitulo').innerText = "Editar: " + c.Nome;
+            document.getElementById('modalClienteTitulo').innerText ="Editar:" + c.Nome;
             document.getElementById('btnExcluirModal').classList.remove('hidden');
             document.getElementById('modalCliente').classList.remove('hidden');
         }
@@ -1091,14 +870,14 @@ const defaultProfiles = {
             const tratativaAtual = document.getElementById('tratativa').value.trim();
 
             if(!nomeAtual) {
-                mostrarToast("Por favor, preencha o Nome Completo.", "erro");
+                mostrarToast("Por favor, preencha o Nome Completo.","erro");
                 btn.innerHTML = originalBtnHtml;
                 btn.disabled = false;
                 return;
             }
 
             const dadosPayload = {
-                acao: isEdit ? "editar" : "novo",
+                acao: isEdit ?"editar" :"novo",
                 aba: profiles[activeUserId].name,
                 originalNome: originalNome || nomeAtual,
                 nome: nomeAtual,
@@ -1156,7 +935,7 @@ const defaultProfiles = {
             salvarCacheLocal();
             aplicarFiltros();
             fecharModalCliente();
-            mostrarToast(isEdit ? "Cliente atualizado com sucesso!" : "Novo cliente adicionado com sucesso!");
+            mostrarToast(isEdit ?"Cliente atualizado com sucesso!" :"Novo cliente adicionado com sucesso!");
 
             // 2. ENVIA PARA A PLANILHA EM SEGUNDO PLANO
             try {
@@ -1187,7 +966,7 @@ const defaultProfiles = {
             const originalNome = (document.getElementById('originalNome').value || document.getElementById('nome').value).trim();
             if(!originalNome && !clienteId) return;
 
-            if(!confirm(`Tem certeza que deseja excluir o cliente "${originalNome}"?\nEle será removido definitivamente do CRM.`)) return;
+            if(!confirm(`Tem certeza que deseja excluir o cliente"${originalNome}"?\nEle será removido definitivamente do CRM.`)) return;
 
             executarExclusao(clienteId, originalNome);
         }
@@ -1195,7 +974,7 @@ const defaultProfiles = {
         function confirmarExclusaoRapida(clienteId) {
             let c = listaClientes.find(item => item.id === clienteId);
             if(!c) return;
-            if(!confirm(`Deseja excluir o cliente "${c.Nome}" do CRM?`)) return;
+            if(!confirm(`Deseja excluir o cliente"${c.Nome}" do CRM?`)) return;
             executarExclusao(clienteId, c.Nome);
         }
 
@@ -1214,11 +993,11 @@ const defaultProfiles = {
             salvarCacheLocal();
             aplicarFiltros();
             fecharModalCliente();
-            mostrarToast(`Cliente "${nomeCliente}" excluído com sucesso!`);
+            mostrarToast(`Cliente"${nomeCliente}" excluído com sucesso!`);
 
             // 4. Envia exclusão para o Google Apps Script
             const dadosPayload = {
-                acao: "excluir",
+                acao:"excluir",
                 aba: profiles[activeUserId].name,
                 originalNome: nomeCliente
             };
