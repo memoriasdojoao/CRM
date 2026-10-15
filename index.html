@@ -302,10 +302,10 @@
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWEgRAYuGBJ6Wbpdf7MjwpS3-iqwdldHqCAFteYLOS8ONpm_V-rZwdoozeCULuMFrc/exec";
         const ADMIN_HASH = "QExldmkxNjEx";
 
-                const defaultProfiles = {
+        const defaultProfiles = {
             user1: { id: 'user1', name: 'Levi', passHash: 'bGV2aTE2MTE=', photo: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80' },
             user2: { id: 'user2', name: 'Selma', passHash: 'c2VsbWExNjEx', photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80' },
-            user3: { id: 'user3', name: 'Ariany', passHash: 'YXJpYW55MTYxMQ==', photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80' }
+            user3: { id: 'user3', name: 'YXJpYW55MTYxMQ==', passHash: 'YXJpYW55MTYxMQ==', name: 'Ariany', photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80' }
         };
 
         let profiles = JSON.parse(localStorage.getItem('crm_santos_profiles')) || defaultProfiles;
@@ -398,7 +398,7 @@
             if(v === '') { i.value = ''; return; }
             v = (v/100).toFixed(2) + '';
             v = v.replace(".", ",");
-            v = v.replace(/(\d)(?=(\d{{3}})+(?!\d))/g, '$1.');
+            v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
             i.value = 'R$ ' + v;
         }
 
@@ -580,16 +580,13 @@
             }
             let csvContent = "data:text/csv;charset=utf-8,";
             let cabecalhos = ["Nome", "Email", "Telefone", "Projeto", "Valor Estimado", "Bairro", "Zona", "Status", "Tratativa"];
-            csvContent += cabecalhos.join(";") + "
-";
+            csvContent += cabecalhos.join(";") + "\r\n";
             clientesFiltrados.forEach(c => {
                 let linha = [
                     c.Nome, c.Email, c.Telefone, c.Projeto, c.ValorEstimado, c.Bairro, c.Zona, c.Status, 
-                    (c.Tratativa || "").replace(/
-/g, " ").replace(/;/g, ",") 
+                    (c.Tratativa || "").replace(/\n/g, " ").replace(/;/g, ",") 
                 ].map(v => `"${v}"`).join(";");
-                csvContent += linha + "
-";
+                csvContent += linha + "\r\n";
             });
             var encodedUri = encodeURI(csvContent);
             var link = document.createElement("a");
