@@ -2,232 +2,557 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRM Multi-usuários - Google Sheets Backend</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CRM Santos</title>
+    
+    <!-- PWA & Icons -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CRM Santos">
+    <!-- Ícone base64 para evitar dependências externas (um ícone azul com a letra S) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234F46E5'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%234F46E5'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
     
-    <!-- Top Navigation / Header -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="bg-indigo-600 text-white p-2 rounded-lg shadow-sm">
-                    <i class="fa-solid fa-address-book text-lg"></i>
-                </div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Meu CRM Cloud</h1>
-            </div>
-            
-            <!-- Seletor de Usuário Ativo -->
-            <div class="flex items-center space-x-3">
-                <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
-                    <i class="fa-solid fa-user-tie text-indigo-600 text-sm"></i>
-                    <span class="text-xs font-medium text-slate-600">Usuário:</span>
-                    <select id="usuarioAtivo" onchange="mudarUsuario()" class="bg-transparent font-bold text-slate-800 text-sm focus:outline-hidden cursor-pointer">
-                        <option value="Levi">Levi</option>
-                        <option value="Selma">Selma</option>
-                        <option value="Ariany">Ariany</option>
-                    </select>
-                </div>
-                <button onclick="abrirModalNovoCliente()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center space-x-2">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Novo Cliente</span>
-                </button>
-                <button onclick="carregarClientes()" id="btnAtualizar" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 p-2 rounded-lg text-sm transition" title="Atualizar dados">
-                    <i class="fa-solid fa-rotate-right"></i>
-                </button>
-            </div>
-        </div>
-    </header>
+    <style>
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen selection:bg-indigo-100 selection:text-indigo-900">
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- TELA DE LOGIN (SELEÇÃO DE PERFIL) -->
+    <div id="loginScreen" class="fixed inset-0 bg-gradient-to-br from-slate-900 to-indigo-900 z-50 flex flex-col items-center justify-center p-4">
         
-        <!-- Metric Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Clientes de <span id="labelUserStat" class="text-indigo-600 font-bold">Levi</span></p>
-                    <h4 id="statTotal" class="text-2xl font-bold text-slate-900 mt-1">0</h4>
-                </div>
-                <div class="bg-blue-50 text-blue-600 p-3 rounded-xl">
-                    <i class="fa-solid fa-users text-xl"></i>
-                </div>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Leads Ativos</p>
-                    <h4 id="statLeads" class="text-2xl font-bold text-slate-900 mt-1">0</h4>
-                </div>
-                <div class="bg-amber-50 text-amber-600 p-3 rounded-xl">
-                    <i class="fa-solid fa-bullseye text-xl"></i>
-                </div>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Em Negociação</p>
-                    <h4 id="statNegociacao" class="text-2xl font-bold text-slate-900 mt-1">0</h4>
-                </div>
-                <div class="bg-purple-50 text-purple-600 p-3 rounded-xl">
-                    <i class="fa-solid fa-handshake text-xl"></i>
-                </div>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Fechados</p>
-                    <h4 id="statFechado" class="text-2xl font-bold text-slate-900 mt-1">0</h4>
-                </div>
-                <div class="bg-emerald-50 text-emerald-600 p-3 rounded-xl">
-                    <i class="fa-solid fa-circle-check text-xl"></i>
+        <div class="mb-10 text-center flex flex-col items-center">
+            <!-- Logo SVG CRM Santos -->
+            <svg class="w-20 h-20 mb-4 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="24" fill="currentColor" fill-opacity="0.1"/>
+                <path d="M70 35H30C27.2386 35 25 37.2386 25 40V70C25 72.7614 27.2386 75 30 75H70C72.7614 75 75 72.7614 75 70V40C75 37.2386 72.7614 35 70 35Z" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M35 35V25C35 20.8579 38.3579 17.5 42.5 17.5H57.5C61.6421 17.5 65 20.8579 65 25V35" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M50 55C52.7614 55 55 52.7614 55 50C55 47.2386 52.7614 45 50 45C47.2386 45 45 47.2386 45 50C45 52.7614 47.2386 55 50 55Z" fill="white"/>
+            </svg>
+            <h1 class="text-3xl font-extrabold tracking-tight text-white cursor-pointer select-none" onclick="logoSecretClick()">
+                CRM <span class="text-indigo-400">Santos</span>
+            </h1>
+            <p class="text-indigo-200 mt-2 text-sm font-medium">Selecione seu perfil para entrar</p>
+        </div>
+
+        <div id="profilesContainer" class="flex flex-wrap justify-center gap-6 max-w-3xl">
+            <!-- Perfis injetados via JS -->
+        </div>
+
+        <!-- Modal de Senha -->
+        <div id="passwordModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm transform transition-all text-center">
+                <img id="loginAvatar" src="" class="w-16 h-16 rounded-full mx-auto border-4 border-indigo-100 shadow-sm mb-4 object-cover">
+                <h3 class="text-lg font-bold text-slate-900 mb-1">Olá, <span id="loginName"></span></h3>
+                <p class="text-sm text-slate-500 mb-6">Digite sua senha para acessar</p>
+                
+                <input type="password" id="inputPassword" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-center text-lg tracking-widest focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition mb-4" placeholder="••••" onkeyup="if(event.key === 'Enter') tryLogin()">
+                
+                <p id="loginError" class="text-rose-500 text-xs font-semibold mb-4 hidden">Senha incorreta!</p>
+                
+                <div class="flex space-x-3">
+                    <button onclick="closePasswordModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-sm font-semibold transition">Cancelar</button>
+                    <button onclick="tryLogin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow-md">Entrar</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Search & Filters Toolbar -->
-        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="relative w-full sm:w-96">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </span>
-                <input type="text" id="inputBusca" onkeyup="filtrarClientes()" placeholder="Pesquisar por nome, projeto ou bairro..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+    <!-- TELA PRINCIPAL (CRM) -->
+    <div id="mainApp" class="hidden">
+        <!-- Top Navigation / Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm glass-card">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="logoSecretClick()">
+                    <!-- Logo SVG Mini -->
+                    <div class="bg-indigo-600 text-white p-1.5 rounded-lg shadow-sm">
+                        <svg class="w-6 h-6" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="100" height="100" rx="20" fill="transparent"/>
+                            <path d="M70 35H30C27.2386 35 25 37.2386 25 40V70C25 72.7614 27.2386 75 30 75H70C72.7614 75 75 72.7614 75 70V40C75 37.2386 72.7614 35 70 35Z" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M35 35V25C35 20.8579 38.3579 17.5 42.5 17.5H57.5C61.6421 17.5 65 20.8579 65 25V35" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="50" cy="55" r="5" fill="white"/>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900 hidden sm:block">CRM <span class="text-indigo-600">Santos</span></h1>
+                </div>
+                
+                <!-- Ações do Cabeçalho -->
+                <div class="flex items-center space-x-2 sm:space-x-3">
+                    <div class="flex items-center space-x-2 bg-slate-50 px-2 sm:px-3 py-1.5 rounded-xl border border-slate-200" title="Trocar de Conta" onclick="logout()" style="cursor: pointer;">
+                        <img id="headerAvatar" src="" class="w-6 h-6 rounded-full object-cover border border-slate-300">
+                        <span id="labelUserStat" class="text-sm font-bold text-slate-800 hidden sm:block">Levi</span>
+                        <i class="fa-solid fa-right-from-bracket text-slate-400 hover:text-rose-500 transition text-xs ml-1"></i>
+                    </div>
+                    
+                    <button onclick="abrirModalCliente()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="hidden sm:inline">Novo Cliente</span>
+                    </button>
+                    <button onclick="carregarClientes()" id="btnAtualizar" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 p-2 rounded-lg text-sm transition shadow-sm" title="Atualizar dados">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
             </div>
-            <div class="flex items-center space-x-3 w-full sm:w-auto justify-end">
-                <select id="filtroStatus" onchange="filtrarClientes()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
-                    <option value="">Todos os Status</option>
-                    <option value="Lead">Lead</option>
-                    <option value="Em Negociação">Em Negociação</option>
-                    <option value="Fechado">Fechado</option>
-                </select>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            
+            <!-- Metric Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Total de Clientes</p>
+                        <i class="fa-solid fa-users text-blue-500"></i>
+                    </div>
+                    <h4 id="statTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Leads Ativos</p>
+                        <i class="fa-solid fa-bullseye text-amber-500"></i>
+                    </div>
+                    <h4 id="statLeads" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Em Negociação</p>
+                        <i class="fa-solid fa-handshake text-purple-500"></i>
+                    </div>
+                    <h4 id="statNegociacao" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Fechados</p>
+                        <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                    </div>
+                    <h4 id="statFechado" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
+                </div>
             </div>
-        </div>
 
-        <!-- Table Card -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                            <th class="py-3 px-6">Cliente / Projeto</th>
-                            <th class="py-3 px-6">Contato</th>
-                            <th class="py-3 px-6">Localização (Bairro / Zona)</th>
-                            <th class="py-3 px-6">Valor Estimado</th>
-                            <th class="py-3 px-6">Status</th>
-                            <th class="py-3 px-6 text-right">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaClientes" class="divide-y divide-slate-100 text-sm">
-                        <tr>
-                            <td colspan="6" class="py-8 text-center text-slate-400">
-                                <i class="fa-solid fa-spinner fa-spin mr-2"></i> Carregando dados da aba correspondente...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Toolbar de Filtros Avançados & Ações em Massa -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm mb-6">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    
+                    <!-- Busca em texto -->
+                    <div class="relative w-full lg:w-1/3">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="inputBusca" onkeyup="aplicarFiltros()" placeholder="Buscar por nome, projeto, email..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                    </div>
+
+                    <!-- Filtros Dropdown -->
+                    <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                        <select id="filtroStatus" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="">Status: Todos</option>
+                            <option value="Lead">Lead</option>
+                            <option value="Em Negociação">Em Negociação</option>
+                            <option value="Fechado">Fechado</option>
+                        </select>
+
+                        <!-- Filtro Zona -->
+                        <select id="filtroZona" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="">Zona: Todas</option>
+                            <option value="Norte">Norte</option>
+                            <option value="Sul">Sul</option>
+                            <option value="Leste">Leste</option>
+                            <option value="Oeste">Oeste</option>
+                            <option value="Centro">Centro</option>
+                        </select>
+
+                        <!-- Filtro de Faixa de Valores -->
+                        <select id="filtroValor" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="">Valores: Todos</option>
+                            <option value="1">Até R$ 300 mil</option>
+                            <option value="2">R$ 300 mil - R$ 1 Milhão</option>
+                            <option value="3">R$ 1 Milhão - R$ 3 Milhões</option>
+                            <option value="4">Acima de R$ 3 Milhões</option>
+                        </select>
+                    </div>
+
+                    <!-- Ações em Massa (Export / Email) -->
+                    <div class="flex items-center gap-2 ml-auto w-full lg:w-auto justify-end border-t lg:border-t-0 pt-3 lg:pt-0 mt-1 lg:mt-0 border-slate-100">
+                        <button onclick="exportarPlanilha()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-sm" title="Exportar resultado para Excel/CSV">
+                            <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span>
+                        </button>
+                        <button onclick="enviarEmailMassa()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-sm" title="Enviar email oculto (BCC) para os leads filtrados">
+                            <i class="fa-solid fa-envelope"></i> <span class="hidden sm:inline">E-mail em Massa</span>
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
 
-    </main>
+            <!-- Tabela Principal -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto hide-scroll">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead>
+                            <tr class="bg-slate-50/80 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                <th class="py-3 px-5">Cliente / Projeto</th>
+                                <th class="py-3 px-5">Contato</th>
+                                <th class="py-3 px-5">Valor / Zona</th>
+                                <th class="py-3 px-5">Status</th>
+                                <th class="py-3 px-5 w-1/4">Tratativa Recente</th>
+                                <th class="py-3 px-5 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaClientes" class="divide-y divide-slate-100 text-sm">
+                            <tr>
+                                <td colspan="6" class="py-12 text-center text-slate-400">
+                                    <i class="fa-solid fa-spinner fa-spin mr-2 text-xl"></i><br>Carregando dados...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-    <!-- Modal Novo Cliente -->
-    <div id="modalCliente" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-100 transform transition-all">
-            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <h3 class="font-bold text-slate-900 text-base">Novo Registro para <span id="modalUsuarioNome" class="text-indigo-600">Levi</span></h3>
-                <button onclick="fecharModal()" class="text-slate-400 hover:text-slate-600 transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
+        </main>
+    </div>
+
+    <!-- Modal Adicionar/Editar Cliente -->
+    <div id="modalCliente" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto hide-scroll border border-slate-100 transform transition-all">
+            <div class="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex items-center justify-between z-10">
+                <h3 id="modalClienteTitulo" class="font-extrabold text-slate-900 text-lg">Novo Registro</h3>
+                <button onclick="fecharModalCliente()" class="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full w-8 h-8 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <form id="formCliente" onsubmit="salvarCliente(event)" class="p-6 space-y-4">
-                <div class="grid grid-cols-2 gap-3">
+            <form id="formCliente" onsubmit="salvarCliente(event)" class="p-6 space-y-5">
+                <input type="hidden" id="idxLinha"> <!-- Oculto: usado se for edição -->
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Nome *</label>
-                        <input type="text" id="nome" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Nome Completo *</label>
+                        <input type="text" id="nome" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">E-mail *</label>
-                        <input type="email" id="email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Telefone</label>
-                        <input type="text" id="telefone" placeholder="(00) 00000-0000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Projeto</label>
-                        <input type="text" id="projeto" placeholder="Ex: Reforma, Compra..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">E-mail *</label>
+                        <input type="email" id="email" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
                     </div>
                 </div>
-                <div class="grid grid-cols-3 gap-3">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Valor Estimado (R$)</label>
-                        <input type="text" id="valorEstimado" placeholder="0,00" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Telefone / WhatsApp</label>
+                        <input type="text" id="telefone" placeholder="(11) 90000-0000" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Bairro</label>
-                        <input type="text" id="bairro" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Projeto / Imóvel</label>
+                        <input type="text" id="projeto" placeholder="Ex: Apartamento Jardins" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Valor Estimado (R$)</label>
+                        <input type="text" id="valorEstimado" placeholder="R$ 0,00" oninput="mascaraMoeda(this)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-indigo-700 focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Zona</label>
-                        <input type="text" id="zona" placeholder="Ex: Sul, Norte..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Bairro</label>
+                        <input type="text" id="bairro" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Zona</label>
+                        <select id="zona" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                            <option value="">Selecionar...</option>
+                            <option value="Norte">Norte</option>
+                            <option value="Sul">Sul</option>
+                            <option value="Leste">Leste</option>
+                            <option value="Oeste">Oeste</option>
+                            <option value="Centro">Centro</option>
+                        </select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Status</label>
-                    <select id="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden transition">
-                        <option value="Lead">Lead</option>
-                        <option value="Em Negociação">Em Negociação</option>
-                        <option value="Fechado">Fechado</option>
-                    </select>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-100 pt-5">
+                    <div class="sm:col-span-1">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Status</label>
+                        <select id="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
+                            <option value="Lead">Lead</option>
+                            <option value="Em Negociação">Em Negociação</option>
+                            <option value="Fechado">Fechado</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Tratativa / Anotações</label>
+                        <textarea id="tratativa" rows="2" placeholder="Descreva a interação, proposta ou próximo passo..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition resize-none"></textarea>
+                    </div>
                 </div>
-                <div class="pt-4 flex items-center justify-end space-x-3">
-                    <button type="button" onclick="fecharModal()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl text-sm font-medium transition">Cancelar</button>
-                    <button type="submit" id="btnSalvar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition shadow-sm">Salvar Registro</button>
+
+                <div class="pt-2 flex items-center justify-end space-x-3">
+                    <button type="button" onclick="fecharModalCliente()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-bold transition">Cancelar</button>
+                    <button type="submit" id="btnSalvar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition shadow-md shadow-indigo-200 flex items-center">
+                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Salvar Registro
+                    </button>
                 </div>
+                
+                <p id="avisoEdicao" class="text-xs text-amber-600 font-medium text-center hidden">
+                    <i class="fa-solid fa-circle-info"></i> Notas: A edição requer que o seu script (backend) do Google suporte atualização. Caso contrário, ele irá adicionar uma nova linha atualizada.
+                </p>
             </form>
         </div>
     </div>
 
+    <!-- Modal de Configuração Secreta (Avatares e Nomes) -->
+    <div id="configModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md transform transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h3 class="text-xl font-black text-slate-900">Configurações de Perfis</h3>
+                    <p class="text-xs font-medium text-slate-500 mt-1">Gerencie os usuários, fotos e senhas.</p>
+                </div>
+                <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-700 transition bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div id="configFormContainer" class="space-y-6 max-h-[60vh] overflow-y-auto hide-scroll px-1">
+                <!-- Gerado via JS -->
+            </div>
+            
+            <button onclick="saveConfigs()" class="w-full mt-6 bg-slate-900 hover:bg-black text-white py-3 rounded-xl text-sm font-bold transition shadow-lg">Salvar Alterações</button>
+        </div>
+    </div>
+
+
     <!-- JavaScript da Aplicação -->
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwUgq9SejA0R0BzHRkYJMBlbfELyewPyhlifpuJ3bLQ-FdBl8cXWNmOERbAu8H-XGrk/exec";
-        let usuarioAtual = localStorage.getItem('crm_usuario_ativo') || "Levi";
-        let listaClientes = [];
-
-        window.onload = function() {
-            document.getElementById('usuarioAtivo').value = usuarioAtual;
-            document.getElementById('labelUserStat').innerText = usuarioAtual;
-            document.getElementById('modalUsuarioNome').innerText = usuarioAtual;
-            carregarClientes();
+        // ======= CONFIGURAÇÕES GERAIS =======
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWEgRAYuGBJ6Wbpdf7MjwpS3-iqwdldHqCAFteYLOS8ONpm_V-rZwdoozeCULuMFrc/exec";
+        
+        // Dados Padrão (serão sobrescritos pelo LocalStorage se existirem)
+        const defaultProfiles = {
+            user1: { id: 'user1', name: 'Levi', pass: '123', photo: 'https://ui-avatars.com/api/?name=Levi&background=E0E7FF&color=3730A3&bold=true' },
+            user2: { id: 'user2', name: 'Selma', pass: '123', photo: 'https://ui-avatars.com/api/?name=Selma&background=FCE7F3&color=9D174D&bold=true' },
+            user3: { id: 'user3', name: 'Ariany', pass: '123', photo: 'https://ui-avatars.com/api/?name=Ariany&background=D1FAE5&color=065F46&bold=true' }
         };
 
-        function mudarUsuario() {
-            usuarioAtual = document.getElementById('usuarioAtivo').value;
-            localStorage.setItem('crm_usuario_ativo', usuarioAtual);
-            document.getElementById('labelUserStat').innerText = usuarioAtual;
-            document.getElementById('modalUsuarioNome').innerText = usuarioAtual;
-            document.getElementById('inputBusca').value = "";
-            document.getElementById('filtroStatus').value = "";
+        let profiles = JSON.parse(localStorage.getItem('crm_santos_profiles')) || defaultProfiles;
+        let activeUserId = localStorage.getItem('crm_santos_activeUser');
+        let listaClientes = [];
+        let clientesFiltrados = [];
+        let secretClicks = 0;
+
+        // ======= INICIALIZAÇÃO =======
+        window.onload = function() {
+            if(activeUserId && profiles[activeUserId]) {
+                iniciarSessao(activeUserId);
+            } else {
+                renderLoginScreen();
+            }
+        };
+
+        // ======= LOGIN & PERFIS =======
+        function renderLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            
+            const container = document.getElementById('profilesContainer');
+            container.innerHTML = '';
+            
+            Object.values(profiles).forEach(p => {
+                container.innerHTML += `
+                    <div onclick="openPasswordModal('${p.id}')" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 p-6 rounded-3xl cursor-pointer transform hover:-translate-y-2 transition-all duration-300 w-36 sm:w-44 text-center group shadow-xl">
+                        <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4">
+                            <img src="${p.photo}" class="w-full h-full rounded-full object-cover border-4 border-indigo-500/50 group-hover:border-indigo-400 shadow-lg transition">
+                            <div class="absolute inset-0 rounded-full ring-inset ring-2 ring-white/20"></div>
+                        </div>
+                        <h3 class="text-white font-bold text-lg sm:text-xl tracking-wide">${p.name}</h3>
+                    </div>
+                `;
+            });
+        }
+
+        let tempAttemptUser = null;
+        function openPasswordModal(userId) {
+            tempAttemptUser = userId;
+            const p = profiles[userId];
+            document.getElementById('loginAvatar').src = p.photo;
+            document.getElementById('loginName').innerText = p.name;
+            document.getElementById('inputPassword').value = '';
+            document.getElementById('loginError').classList.add('hidden');
+            document.getElementById('passwordModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('inputPassword').focus(), 100);
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.add('hidden');
+            tempAttemptUser = null;
+        }
+
+        function tryLogin() {
+            const pass = document.getElementById('inputPassword').value;
+            if(profiles[tempAttemptUser].pass === pass) {
+                closePasswordModal();
+                iniciarSessao(tempAttemptUser);
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function iniciarSessao(userId) {
+            activeUserId = userId;
+            localStorage.setItem('crm_santos_activeUser', activeUserId);
+            
+            const user = profiles[activeUserId];
+            document.getElementById('labelUserStat').innerText = user.name;
+            document.getElementById('headerAvatar').src = user.photo;
+            
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
             carregarClientes();
         }
 
+        function logout() {
+            localStorage.removeItem('crm_santos_activeUser');
+            activeUserId = null;
+            listaClientes = [];
+            renderLoginScreen();
+        }
+
+        // ======= MÁSCARAS & FORMATADORES =======
+        function mascaraMoeda(i) {
+            let v = i.value.replace(/\D/g,'');
+            if(v === '') { i.value = ''; return; }
+            v = (v/100).toFixed(2) + '';
+            v = v.replace(".", ",");
+            v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+            i.value = 'R$ ' + v;
+        }
+
+        function extrairNumero(str) {
+            if(!str) return 0;
+            let numStr = String(str).replace(/[^\d,-]/g, '').replace(',', '.');
+            return parseFloat(numStr) || 0;
+        }
+
+        function formatarMoedaView(valor) {
+            let num = extrairNumero(valor);
+            return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // ======= SECRET CONFIG MODAL =======
+        function logoSecretClick() {
+            secretClicks++;
+            if(secretClicks >= 5) {
+                secretClicks = 0;
+                openConfigModal();
+            }
+            // reseta contador depois de 2 segundos se não clicar rapido
+            setTimeout(() => { secretClicks = 0; }, 2000);
+        }
+
+        function openConfigModal() {
+            const container = document.getElementById('configFormContainer');
+            container.innerHTML = '';
+            
+            Object.values(profiles).forEach((p, idx) => {
+                container.innerHTML += `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <h4 class="font-bold text-slate-800 mb-3 text-sm flex items-center"><i class="fa-solid fa-user-gear mr-2 text-indigo-500"></i> Perfil ${idx+1}</h4>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Nome (Aba na Planilha)</label>
+                                <input type="text" id="cfg_name_${p.id}" value="${p.name}" class="w-full text-sm px-3 py-2 border rounded-lg mt-1 font-semibold">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">URL da Foto Perfil</label>
+                                <input type="text" id="cfg_photo_${p.id}" value="${p.photo}" class="w-full text-xs px-3 py-2 border rounded-lg mt-1 text-slate-500" placeholder="https://link-da-imagem.com/foto.jpg">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold text-slate-500 uppercase">Senha</label>
+                                <input type="text" id="cfg_pass_${p.id}" value="${p.pass}" class="w-full text-sm px-3 py-2 border rounded-lg mt-1">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('configModal').classList.remove('hidden');
+        }
+
+        function closeConfigModal() {
+            document.getElementById('configModal').classList.add('hidden');
+        }
+
+        function saveConfigs() {
+            Object.values(profiles).forEach(p => {
+                p.name = document.getElementById(`cfg_name_${p.id}`).value;
+                p.photo = document.getElementById(`cfg_photo_${p.id}`).value || `https://ui-avatars.com/api/?name=${p.name}`;
+                p.pass = document.getElementById(`cfg_pass_${p.id}`).value;
+            });
+            localStorage.setItem('crm_santos_profiles', JSON.stringify(profiles));
+            closeConfigModal();
+            alert("Configurações salvas! A página será atualizada.");
+            location.reload();
+        }
+
+        // ======= COMUNICAÇÃO COM GOOGLE SHEETS =======
         async function carregarClientes() {
             const btn = document.getElementById('btnAtualizar');
             btn.classList.add('fa-spin');
             
             try {
-                let resposta = await fetch(`${WEB_APP_URL}?aba=${encodeURIComponent(usuarioAtual)}`);
+                let currentUserName = profiles[activeUserId].name;
+                let resposta = await fetch(`${WEB_APP_URL}?aba=${encodeURIComponent(currentUserName)}`);
                 let dados = await resposta.json();
-                listaClientes = dados;
-                renderizarTabela(listaClientes);
-                atualizarMetricas(listaClientes);
+                
+                listaClientes = dados.map(item => ({
+                    Nome: item.Nome || item.nome || '',
+                    Email: item.Email || item.email || '',
+                    Telefone: item.Telefone || item.telefone || '',
+                    Projeto: item.Projeto || item.projeto || '',
+                    ValorEstimado: item['Valor estimado'] || item.ValorEstimado || item.valorEstimado || '0',
+                    Bairro: item.Bairro || item.bairro || '',
+                    Zona: item.Zona || item.zona || '',
+                    Status: item.Status || item.status || 'Lead',
+                    Tratativa: item.Tratativa || item.tratativa || ''
+                })).reverse(); // Reverse para mostrar os mais novos no topo
+
+                aplicarFiltros(); 
             } catch (erro) {
-                console.error("Erro ao carregar dados:", erro);
-                document.getElementById('tabelaClientes').innerHTML = `<tr><td colspan="6" class="py-8 text-center text-rose-500"><i class="fa-solid fa-circle-exclamation mr-1"></i> Erro ao carregar dados da aba ${usuarioAtual}. Verifique se a aba existe na planilha.</td></tr>`;
+                console.error("Erro:", erro);
+                document.getElementById('tabelaClientes').innerHTML = `<tr><td colspan="6" class="py-8 text-center text-rose-500 font-bold"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Erro ao buscar dados da aba ${profiles[activeUserId].name}.</td></tr>`;
             } finally {
                 btn.classList.remove('fa-spin');
             }
+        }
+
+        // ======= FILTROS E RENDERIZAÇÃO =======
+        function aplicarFiltros() {
+            let busca = document.getElementById('inputBusca').value.toLowerCase();
+            let status = document.getElementById('filtroStatus').value;
+            let zona = document.getElementById('filtroZona').value;
+            let valorRange = document.getElementById('filtroValor').value;
+
+            clientesFiltrados = listaClientes.filter(c => {
+                // Filtro Texto
+                let textMatch = (c.Nome.toLowerCase().includes(busca) || c.Projeto.toLowerCase().includes(busca) || c.Email.toLowerCase().includes(busca) || c.Tratativa.toLowerCase().includes(busca));
+                
+                // Filtro Status & Zona
+                let statusMatch = status === "" || c.Status === status;
+                let zonaMatch = zona === "" || c.Zona === zona;
+                
+                // Filtro Valores
+                let numValor = extrairNumero(c.ValorEstimado);
+                let valorMatch = true;
+                if(valorRange === "1") valorMatch = (numValor <= 300000);
+                else if(valorRange === "2") valorMatch = (numValor > 300000 && numValor <= 1000000);
+                else if(valorRange === "3") valorMatch = (numValor > 1000000 && numValor <= 3000000);
+                else if(valorRange === "4") valorMatch = (numValor > 3000000);
+
+                return textMatch && statusMatch && zonaMatch && valorMatch;
+            });
+
+            atualizarMetricas(clientesFiltrados);
+            renderizarTabela(clientesFiltrados);
         }
 
         function renderizarTabela(dados) {
@@ -235,46 +560,45 @@
             tabela.innerHTML = "";
 
             if (dados.length === 0) {
-                tabela.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Nenhum registro cadastrado para ${usuarioAtual}.</td></tr>`;
+                tabela.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-slate-400 font-medium"><i class="fa-solid fa-folder-open text-3xl mb-3 opacity-50 block"></i>Nenhum lead encontrado com estes filtros.</td></tr>`;
                 return;
             }
 
-            dados.forEach((cliente) => {
+            dados.forEach((cliente, _) => {
                 let badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
                 if (cliente.Status === 'Em Negociação') badgeClass = "bg-purple-50 text-purple-700 border-purple-200";
                 if (cliente.Status === 'Fechado') badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
                 
-                // Evitar erro de aspas ao passar para a função
-                const nomeSeguro = (cliente.Nome || '').replace(/'/g, "\'");
-                const emailSeguro = (cliente.Email || '').replace(/'/g, "\'");
-                const telefoneSeguro = (cliente.Telefone || '').replace(/'/g, "\'");
-                const projetoSeguro = (cliente.Projeto || '').replace(/'/g, "\'");
+                let valorFmt = formatarMoedaView(cliente.ValorEstimado);
+                let realIndex = listaClientes.indexOf(cliente); // Pegar idx do array original pra editar correto
 
                 let linha = `
-                <tr class="hover:bg-slate-50/80 transition">
-                    <td class="py-4 px-6">
-                        <div class="font-semibold text-slate-900">${cliente.Nome || ''}</div>
-                        <div class="text-xs text-slate-500"><i class="fa-solid fa-diagram-project mr-1"></i>${cliente.Projeto || 'Sem projeto'}</div>
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100 last:border-0 group cursor-pointer" onclick="editarCliente(${realIndex}, event)">
+                    <td class="py-4 px-5">
+                        <div class="font-extrabold text-slate-900">${cliente.Nome}</div>
+                        <div class="text-[11px] font-semibold text-indigo-600 mt-1 uppercase tracking-wide"><i class="fa-solid fa-building mr-1"></i>${cliente.Projeto || '-'}</div>
                     </td>
-                    <td class="py-4 px-6">
-                        <div class="text-slate-700">${cliente.Email || ''}</div>
-                        <div class="text-xs text-slate-500">${cliente.Telefone || ''}</div>
+                    <td class="py-4 px-5">
+                        <div class="text-sm font-medium text-slate-700">${cliente.Email}</div>
+                        <div class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-phone mr-1 text-slate-300"></i>${cliente.Telefone || '-'}</div>
                     </td>
-                    <td class="py-4 px-6">
-                        <div class="text-slate-800 text-xs font-medium">${cliente.Bairro || '-'}</div>
-                        <div class="text-xs text-slate-500">Zona: ${cliente.Zona || '-'}</div>
+                    <td class="py-4 px-5">
+                        <div class="font-bold text-slate-800 text-sm mb-0.5">${valorFmt}</div>
+                        <div class="text-[11px] text-slate-500 font-medium uppercase"><i class="fa-solid fa-map-pin mr-1 text-slate-300"></i>${cliente.Zona || '-'} ${cliente.Bairro ? '('+cliente.Bairro+')' : ''}</div>
                     </td>
-                    <td class="py-4 px-6 font-semibold text-slate-700 text-xs">
-                        R$ ${cliente.ValorEstimado || '0,00'}
-                    </td>
-                    <td class="py-4 px-6">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${badgeClass}">
-                            ${cliente.Status || 'Lead'}
+                    <td class="py-4 px-5">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-black uppercase border ${badgeClass}">
+                            ${cliente.Status}
                         </span>
                     </td>
-                    <td class="py-4 px-6 text-right space-x-2">
-                        <button onclick="copiarDetalhes('${nomeSeguro}', '${emailSeguro}', '${telefoneSeguro}', '${projetoSeguro}')" class="text-slate-400 hover:text-indigo-600 transition" title="Copiar contato">
-                            <i class="fa-solid fa-copy"></i>
+                    <td class="py-4 px-5 max-w-[200px]">
+                        <div class="text-xs text-slate-600 truncate whitespace-normal line-clamp-2" title="${cliente.Tratativa}">
+                            <i class="fa-regular fa-comment-dots mr-1 text-slate-400"></i>${cliente.Tratativa || '<span class="italic text-slate-400">Clique para adicionar tratativa</span>'}
+                        </div>
+                    </td>
+                    <td class="py-4 px-5 text-center">
+                        <button onclick="copiarDetalhes('${cliente.Nome.replace(/'/g,"\'").replace(/"/g,"&quot;")}', '${cliente.Email}', '${cliente.Telefone}', '${cliente.Projeto.replace(/'/g,"\'").replace(/"/g,"&quot;")}'); event.stopPropagation();" class="text-slate-400 hover:text-indigo-600 bg-white hover:bg-indigo-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Copiar contato">
+                            <i class="fa-regular fa-copy"></i>
                         </button>
                     </td>
                 </tr>`;
@@ -289,42 +613,98 @@
             document.getElementById('statFechado').innerText = dados.filter(c => c.Status === 'Fechado').length;
         }
 
-        function filtrarClientes() {
-            let busca = document.getElementById('inputBusca').value.toLowerCase();
-            let statusFiltro = document.getElementById('filtroStatus').value;
-
-            let filtrados = listaClientes.filter(cliente => {
-                let nome = (cliente.Nome || '').toLowerCase();
-                let projeto = (cliente.Projeto || '').toLowerCase();
-                let bairro = (cliente.Bairro || '').toLowerCase();
-                let email = (cliente.Email || '').toLowerCase();
-                
-                let matchBusca = nome.includes(busca) || projeto.includes(busca) || bairro.includes(busca) || email.includes(busca);
-                let matchStatus = statusFiltro === "" || cliente.Status === statusFiltro;
-
-                return matchBusca && matchStatus;
-            });
-
-            renderizarTabela(filtrados);
+        // ======= AÇÕES EM MASSA =======
+        function enviarEmailMassa() {
+            if(clientesFiltrados.length === 0) {
+                alert("Nenhum cliente para enviar e-mail. Ajuste os filtros.");
+                return;
+            }
+            let emails = clientesFiltrados.map(c => c.Email).filter(e => e.trim() !== "").join(",");
+            if(emails === "") {
+                alert("Os clientes filtrados não possuem e-mail cadastrado.");
+                return;
+            }
+            window.location.href = `mailto:?bcc=${emails}&subject=Contato CRM Santos`;
         }
 
-        function abrirModalNovoCliente() {
+        function exportarPlanilha() {
+            if(clientesFiltrados.length === 0) {
+                alert("Nenhum cliente para exportar.");
+                return;
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            let cabecalhos = ["Nome", "Email", "Telefone", "Projeto", "Valor Estimado", "Bairro", "Zona", "Status", "Tratativa"];
+            csvContent += cabecalhos.join(";") + "\r\n";
+            
+            clientesFiltrados.forEach(c => {
+                let linha = [
+                    c.Nome, c.Email, c.Telefone, c.Projeto, c.ValorEstimado, c.Bairro, c.Zona, c.Status, 
+                    (c.Tratativa || "").replace(/\n/g, " ").replace(/;/g, ",") 
+                ].map(v => `"${v}"`).join(";");
+                csvContent += linha + "\r\n";
+            });
+
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Export_CRM_${profiles[activeUserId].name}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ======= MODAL & SALVAMENTO =======
+        function abrirModalCliente() {
             document.getElementById('formCliente').reset();
+            document.getElementById('idxLinha').value = "";
+            document.getElementById('modalClienteTitulo').innerText = "Novo Registro";
+            document.getElementById('avisoEdicao').classList.add('hidden');
             document.getElementById('modalCliente').classList.remove('hidden');
         }
 
-        function fecharModal() {
+        function editarCliente(index, event) {
+            if(event.target.closest('button')) return;
+
+            let c = listaClientes[index];
+            document.getElementById('idxLinha').value = index;
+            document.getElementById('nome').value = c.Nome;
+            document.getElementById('email').value = c.Email;
+            document.getElementById('telefone').value = c.Telefone;
+            document.getElementById('projeto').value = c.Projeto;
+            document.getElementById('bairro').value = c.Bairro;
+            document.getElementById('zona').value = c.Zona;
+            document.getElementById('status').value = c.Status;
+            document.getElementById('tratativa').value = c.Tratativa;
+            
+            let inputV = document.getElementById('valorEstimado');
+            if(String(c.ValorEstimado).includes('R$')) {
+                inputV.value = c.ValorEstimado;
+            } else {
+                inputV.value = c.ValorEstimado;
+                mascaraMoeda(inputV);
+            }
+
+            document.getElementById('modalClienteTitulo').innerText = "Editar/Tratativa: " + c.Nome;
+            document.getElementById('avisoEdicao').classList.remove('hidden');
+            document.getElementById('modalCliente').classList.remove('hidden');
+        }
+
+        function fecharModalCliente() {
             document.getElementById('modalCliente').classList.add('hidden');
         }
 
         async function salvarCliente(event) {
             event.preventDefault();
             const btn = document.getElementById('btnSalvar');
-            btn.innerText = "Salvando...";
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Salvando...';
             btn.disabled = true;
 
+            const isEdit = document.getElementById('idxLinha').value !== "";
+
             const dadosCliente = {
-                aba: usuarioAtual,
+                acao: isEdit ? "editar" : "novo",
+                aba: profiles[activeUserId].name,
                 nome: document.getElementById('nome').value,
                 email: document.getElementById('email').value,
                 telefone: document.getElementById('telefone').value,
@@ -332,7 +712,8 @@
                 valorEstimado: document.getElementById('valorEstimado').value,
                 bairro: document.getElementById('bairro').value,
                 zona: document.getElementById('zona').value,
-                status: document.getElementById('status').value
+                status: document.getElementById('status').value,
+                tratativa: document.getElementById('tratativa').value
             };
 
             try {
@@ -343,14 +724,14 @@
                     body: JSON.stringify(dadosCliente)
                 });
 
-                fecharModal();
-                alert(`Registro salvo com sucesso na aba de ${usuarioAtual}!`);
+                fecharModalCliente();
+                alert(`Registro processado com sucesso na aba de ${profiles[activeUserId].name}!`);
                 setTimeout(carregarClientes, 1500);
             } catch (erro) {
                 console.error(erro);
-                alert("Erro ao salvar dados.");
+                alert("Erro ao salvar dados. Verifique a conexão.");
             } finally {
-                btn.innerText = "Salvar Registro";
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> Salvar Registro';
                 btn.disabled = false;
             }
         }
