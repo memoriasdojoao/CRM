@@ -27,7 +27,6 @@
     <div id="loginScreen" class="fixed inset-0 bg-gradient-to-br from-slate-900 to-indigo-900 z-50 flex flex-col items-center justify-center p-4">
         
         <div class="mb-10 text-center flex flex-col items-center">
-            <!-- Logo SVG CRM Santos -->
             <svg class="w-20 h-20 mb-4 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="100" height="100" rx="24" fill="currentColor" fill-opacity="0.1"/>
                 <path d="M70 35H30C27.2386 35 25 37.2386 25 40V70C25 72.7614 27.2386 75 30 75H70C72.7614 75 75 72.7614 75 70V40C75 37.2386 72.7614 35 70 35Z" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -40,9 +39,7 @@
             <p class="text-indigo-200 mt-2 text-sm font-medium">Selecione seu perfil para entrar</p>
         </div>
 
-        <div id="profilesContainer" class="flex flex-wrap justify-center gap-6 max-w-3xl">
-            <!-- Perfis injetados via JS -->
-        </div>
+        <div id="profilesContainer" class="flex flex-wrap justify-center gap-6 max-w-3xl"></div>
 
         <!-- Modal de Senha Perfil -->
         <div id="passwordModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
@@ -83,11 +80,9 @@
 
     <!-- TELA PRINCIPAL (CRM) -->
     <div id="mainApp" class="hidden">
-        <!-- Top Navigation / Header -->
         <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm glass-card">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
                 <div class="flex items-center space-x-3 cursor-pointer select-none" onclick="logoSecretClick()">
-                    <!-- Logo SVG Mini -->
                     <div class="bg-indigo-600 text-white p-1.5 rounded-lg shadow-sm">
                         <svg class="w-6 h-6" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <rect width="100" height="100" rx="20" fill="transparent"/>
@@ -99,7 +94,6 @@
                     <h1 class="text-xl font-bold tracking-tight text-slate-900 hidden sm:block">CRM <span class="text-indigo-600">Santos</span></h1>
                 </div>
                 
-                <!-- Ações do Cabeçalho -->
                 <div class="flex items-center space-x-2 sm:space-x-3">
                     <div class="flex items-center space-x-2 bg-slate-50 px-2 sm:px-3 py-1.5 rounded-xl border border-slate-200" title="Trocar de Conta" onclick="logout()" style="cursor: pointer;">
                         <img id="headerAvatar" src="" class="w-6 h-6 rounded-full object-cover border border-slate-300">
@@ -120,43 +114,42 @@
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             
-            <!-- Metric Cards -->
+            <!-- Cards de Métricas Clicáveis -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div onclick="filtrarPorCard('')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-indigo-400 transition group">
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Total de Clientes</p>
+                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-indigo-600 transition">Total de Clientes</p>
                         <i class="fa-solid fa-users text-blue-500"></i>
                     </div>
                     <h4 id="statTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div onclick="filtrarPorCard('Lead')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-amber-400 transition group">
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Leads Ativos</p>
+                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-amber-600 transition">Leads Ativos</p>
                         <i class="fa-solid fa-bullseye text-amber-500"></i>
                     </div>
                     <h4 id="statLeads" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div onclick="filtrarPorCard('Em Negociação')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-purple-400 transition group">
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Em Negociação</p>
+                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-purple-600 transition">Em Negociação</p>
                         <i class="fa-solid fa-handshake text-purple-500"></i>
                     </div>
                     <h4 id="statNegociacao" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
                 </div>
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div onclick="filtrarPorCard('Fechado')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-emerald-400 transition group">
                     <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">Fechados</p>
+                        <p class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-emerald-600 transition">Fechados</p>
                         <i class="fa-solid fa-circle-check text-emerald-500"></i>
                     </div>
                     <h4 id="statFechado" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
                 </div>
             </div>
 
-            <!-- Toolbar de Filtros Avançados & Ações em Massa -->
+            <!-- Toolbar de Filtros & Ações (Botões com mesmo tamanho e nome 'E-mail') -->
             <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm mb-6">
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                     
-                    <!-- Busca em texto -->
                     <div class="relative w-full lg:w-1/3">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">
                             <i class="fa-solid fa-magnifying-glass"></i>
@@ -164,7 +157,6 @@
                         <input type="text" id="inputBusca" onkeyup="aplicarFiltros()" placeholder="Buscar por nome, projeto, email..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
                     </div>
 
-                    <!-- Filtros Dropdown -->
                     <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                         <select id="filtroStatus" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                             <option value="">Status: Todos</option>
@@ -173,7 +165,6 @@
                             <option value="Fechado">Fechado</option>
                         </select>
 
-                        <!-- Filtro Zona -->
                         <select id="filtroZona" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                             <option value="">Zona: Todas</option>
                             <option value="Norte">Norte</option>
@@ -183,7 +174,6 @@
                             <option value="Centro">Centro</option>
                         </select>
 
-                        <!-- Filtro de Faixa de Valores -->
                         <select id="filtroValor" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                             <option value="">Valores: Todos</option>
                             <option value="1">Até R$ 300 mil</option>
@@ -193,13 +183,13 @@
                         </select>
                     </div>
 
-                    <!-- Ações em Massa (Export / Email) -->
+                    <!-- Botões Exportar e E-mail com largura fixa idêntica -->
                     <div class="flex items-center gap-2 ml-auto w-full lg:w-auto justify-end border-t lg:border-t-0 pt-3 lg:pt-0 mt-1 lg:mt-0 border-slate-100">
-                        <button onclick="exportarPlanilha()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-sm" title="Exportar resultado para Excel/CSV">
-                            <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">Exportar</span>
+                        <button onclick="exportarPlanilha()" class="w-36 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm" title="Exportar resultado para Excel/CSV">
+                            <i class="fa-solid fa-file-excel"></i> <span>Exportar</span>
                         </button>
-                        <button onclick="enviarEmailMassa()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 shadow-sm" title="Enviar email oculto (BCC) para os leads filtrados">
-                            <i class="fa-solid fa-envelope"></i> <span class="hidden sm:inline">E-mail em Massa</span>
+                        <button onclick="enviarEmailMassa()" class="w-36 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm" title="Enviar email oculto (BCC) para os leads filtrados">
+                            <i class="fa-solid fa-envelope"></i> <span>E-mail</span>
                         </button>
                     </div>
                 </div>
@@ -243,7 +233,8 @@
                 </button>
             </div>
             <form id="formCliente" onsubmit="salvarCliente(event)" class="p-6 space-y-5">
-                <input type="hidden" id="idxLinha"> <!-- Oculto: usado se for edição -->
+                <input type="hidden" id="idxLinha">
+                <input type="hidden" id="originalNome">
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -304,21 +295,23 @@
                     </div>
                 </div>
 
-                <div class="pt-2 flex items-center justify-end space-x-3">
-                    <button type="button" onclick="fecharModalCliente()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-bold transition">Cancelar</button>
-                    <button type="submit" id="btnSalvar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition shadow-md shadow-indigo-200 flex items-center">
-                        <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Salvar Registro
+                <div class="pt-2 flex items-center justify-between">
+                    <button type="button" id="btnExcluirModal" onclick="excluirClienteAtual()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-4 py-2.5 rounded-xl text-sm font-bold transition hidden flex items-center gap-2">
+                        <i class="fa-solid fa-trash-can"></i> Excluir Cliente
                     </button>
+                    
+                    <div class="flex items-center space-x-3 ml-auto">
+                        <button type="button" onclick="fecharModalCliente()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-bold transition">Cancelar</button>
+                        <button type="submit" id="btnSalvar" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition shadow-md shadow-indigo-200 flex items-center">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> Salvar Registro
+                        </button>
+                    </div>
                 </div>
-                
-                <p id="avisoEdicao" class="text-xs text-amber-600 font-medium text-center hidden">
-                    <i class="fa-solid fa-circle-info"></i> Notas: A edição requer que o seu script (backend) do Google suporte atualização. Caso contrário, ele irá adicionar uma nova linha atualizada.
-                </p>
             </form>
         </div>
     </div>
 
-    <!-- Modal de Configuração Secreta (Avatares e Nomes) -->
+    <!-- Modal de Configuração Secreta (Admin) -->
     <div id="configModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
         <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md transform transition-all">
             <div class="flex justify-between items-center mb-6">
@@ -329,25 +322,17 @@
                 <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-700 transition bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <div id="configFormContainer" class="space-y-6 max-h-[60vh] overflow-y-auto hide-scroll px-1">
-                <!-- Gerado via JS -->
-            </div>
+            <div id="configFormContainer" class="space-y-6 max-h-[60vh] overflow-y-auto hide-scroll px-1"></div>
             
             <button onclick="saveConfigs()" class="w-full mt-6 bg-slate-900 hover:bg-black text-white py-3 rounded-xl text-sm font-bold transition shadow-lg">Salvar Alterações</button>
         </div>
     </div>
 
 
-    <!-- JavaScript da Aplicação -->
     <script>
-        // ======= CONFIGURAÇÕES GERAIS =======
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWEgRAYuGBJ6Wbpdf7MjwpS3-iqwdldHqCAFteYLOS8ONpm_V-rZwdoozeCULuMFrc/exec";
-        
-        // A SENHA DO ADMIN É: @Levi1611
-        // Obfuscada (Base64) para não aparecer limpa no GitHub Público:
         const ADMIN_HASH = "QExldmkxNjEx";
 
-        // Senhas Iniciais Obfuscadas (Base64):
         const defaultProfiles = {
             user1: { id: 'user1', name: 'Levi', passHash: 'bGV2aTE2MTE=', photo: 'https://ui-avatars.com/api/?name=Levi&background=E0E7FF&color=3730A3&bold=true' },
             user2: { id: 'user2', name: 'Selma', passHash: 'c2VsbWExNjEx', photo: 'https://ui-avatars.com/api/?name=Selma&background=FCE7F3&color=9D174D&bold=true' },
@@ -362,13 +347,11 @@
         let secretClicks = 0;
         let secretTimeout = null;
 
-        // ======= INICIALIZAÇÃO E SESSÃO (3 DIAS) =======
         window.onload = function() {
             let storedUser = localStorage.getItem('crm_santos_activeUser');
             let sessionExpiry = localStorage.getItem('crm_santos_session_expiry');
             let now = new Date().getTime();
 
-            // Proteção contra lixo no cache ("null" em string) gerado pelo erro anterior
             if(storedUser && storedUser !== "null" && profiles[storedUser] && sessionExpiry && now < parseInt(sessionExpiry)) {
                 iniciarSessao(storedUser, false);
             } else {
@@ -376,7 +359,6 @@
             }
         };
 
-        // ======= LOGIN & PERFIS =======
         function renderLoginScreen() {
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('mainApp').classList.add('hidden');
@@ -411,16 +393,15 @@
 
         function closePasswordModal() {
             document.getElementById('passwordModal').classList.add('hidden');
-            // NÃO apagar tempAttemptUser aqui para não quebrar a lógica do tryLogin!
         }
 
         function tryLogin() {
             const pass = document.getElementById('inputPassword').value;
             if(btoa(pass) === profiles[tempAttemptUser].passHash) {
-                let u = tempAttemptUser; // Salva quem é antes de fechar e limpar
+                let u = tempAttemptUser;
                 closePasswordModal();
                 tempAttemptUser = null; 
-                iniciarSessao(u, true); // true = novo login (gera 3 dias)
+                iniciarSessao(u, true);
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
@@ -453,7 +434,6 @@
             renderLoginScreen();
         }
 
-        // ======= MÁSCARAS & FORMATADORES =======
         function mascaraMoeda(i) {
             let v = i.value.replace(/\D/g,'');
             if(v === '') { i.value = ''; return; }
@@ -474,16 +454,13 @@
             return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // ======= SECRET CONFIG MODAL (ADMIN) =======
         function logoSecretClick() {
             secretClicks++;
-            clearTimeout(secretTimeout); // Limpa o timer anterior pra não engolir cliques
-            
+            clearTimeout(secretTimeout);
             if(secretClicks >= 5) {
                 secretClicks = 0;
                 openAdminPasswordModal();
             } else {
-                // Reseta a contagem só se passar 2 segundos sem nenhum clique
                 secretTimeout = setTimeout(() => { secretClicks = 0; }, 2000);
             }
         }
@@ -512,11 +489,9 @@
         function openConfigModal() {
             const container = document.getElementById('configFormContainer');
             container.innerHTML = '';
-            
             Object.values(profiles).forEach((p, idx) => {
                 let decodedPass = "";
                 try { decodedPass = atob(p.passHash); } catch(e) { decodedPass = ""; }
-                
                 container.innerHTML += `
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
                         <h4 class="font-bold text-slate-800 mb-3 text-sm flex items-center"><i class="fa-solid fa-user-gear mr-2 text-indigo-500"></i> Perfil ${idx+1}</h4>
@@ -537,7 +512,6 @@
                     </div>
                 `;
             });
-            
             document.getElementById('configModal').classList.remove('hidden');
         }
 
@@ -558,7 +532,6 @@
             location.reload();
         }
 
-        // ======= COMUNICAÇÃO COM GOOGLE SHEETS =======
         async function carregarClientes() {
             const btn = document.getElementById('btnAtualizar');
             btn.classList.add('fa-spin');
@@ -578,7 +551,7 @@
                     Zona: item.Zona || item.zona || '',
                     Status: item.Status || item.status || 'Lead',
                     Tratativa: item.Tratativa || item.tratativa || ''
-                })).reverse(); // Reverse para mostrar os mais novos no topo
+                })).reverse();
 
                 aplicarFiltros(); 
             } catch (erro) {
@@ -589,7 +562,11 @@
             }
         }
 
-        // ======= FILTROS E RENDERIZAÇÃO =======
+        function filtrarPorCard(statusDesejado) {
+            document.getElementById('filtroStatus').value = statusDesejado;
+            aplicarFiltros();
+        }
+
         function aplicarFiltros() {
             let busca = document.getElementById('inputBusca').value.toLowerCase();
             let status = document.getElementById('filtroStatus').value;
@@ -611,7 +588,7 @@
                 return textMatch && statusMatch && zonaMatch && valorMatch;
             });
 
-            atualizarMetricas(clientesFiltrados);
+            atualizarMetricas(listaClientes);
             renderizarTabela(clientesFiltrados);
         }
 
@@ -666,14 +643,13 @@
             });
         }
 
-        function atualizarMetricas(dados) {
-            document.getElementById('statTotal').innerText = dados.length;
-            document.getElementById('statLeads').innerText = dados.filter(c => c.Status === 'Lead').length;
-            document.getElementById('statNegociacao').innerText = dados.filter(c => c.Status === 'Em Negociação').length;
-            document.getElementById('statFechado').innerText = dados.filter(c => c.Status === 'Fechado').length;
+        function atualizarMetricas(dadosBase) {
+            document.getElementById('statTotal').innerText = dadosBase.length;
+            document.getElementById('statLeads').innerText = dadosBase.filter(c => c.Status === 'Lead').length;
+            document.getElementById('statNegociacao').innerText = dadosBase.filter(c => c.Status === 'Em Negociação').length;
+            document.getElementById('statFechado').innerText = dadosBase.filter(c => c.Status === 'Fechado').length;
         }
 
-        // ======= AÇÕES EM MASSA =======
         function enviarEmailMassa() {
             if(clientesFiltrados.length === 0) {
                 alert("Nenhum cliente para enviar e-mail. Ajuste os filtros.");
@@ -714,12 +690,12 @@
             document.body.removeChild(link);
         }
 
-        // ======= MODAL & SALVAMENTO =======
         function abrirModalCliente() {
             document.getElementById('formCliente').reset();
             document.getElementById('idxLinha').value = "";
+            document.getElementById('originalNome').value = "";
             document.getElementById('modalClienteTitulo').innerText = "Novo Registro";
-            document.getElementById('avisoEdicao').classList.add('hidden');
+            document.getElementById('btnExcluirModal').classList.add('hidden');
             document.getElementById('modalCliente').classList.remove('hidden');
         }
 
@@ -728,6 +704,7 @@
 
             let c = listaClientes[index];
             document.getElementById('idxLinha').value = index;
+            document.getElementById('originalNome').value = c.Nome; 
             document.getElementById('nome').value = c.Nome;
             document.getElementById('email').value = c.Email;
             document.getElementById('telefone').value = c.Telefone;
@@ -746,7 +723,7 @@
             }
 
             document.getElementById('modalClienteTitulo').innerText = "Editar/Tratativa: " + c.Nome;
-            document.getElementById('avisoEdicao').classList.remove('hidden');
+            document.getElementById('btnExcluirModal').classList.remove('hidden');
             document.getElementById('modalCliente').classList.remove('hidden');
         }
 
@@ -761,10 +738,12 @@
             btn.disabled = true;
 
             const isEdit = document.getElementById('idxLinha').value !== "";
+            const originalNome = document.getElementById('originalNome').value;
 
             const dadosCliente = {
                 acao: isEdit ? "editar" : "novo",
                 aba: profiles[activeUserId].name,
+                originalNome: originalNome,
                 nome: document.getElementById('nome').value,
                 email: document.getElementById('email').value,
                 telefone: document.getElementById('telefone').value,
@@ -796,9 +775,38 @@
             }
         }
 
+        async function excluirClienteAtual() {
+            let originalNome = document.getElementById('originalNome').value;
+            if(!originalNome) return;
+
+            if(!confirm(`Tem certeza que deseja excluir o cliente "${originalNome}"?`)) return;
+
+            const dadosCliente = {
+                acao: "excluir",
+                aba: profiles[activeUserId].name,
+                originalNome: originalNome
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dadosCell = dadosCliente)
+                });
+
+                fecharModalCliente();
+                alert("Cliente excluído com sucesso!");
+                setTimeout(carregarClientes, 1500);
+            } catch (erro) {
+                console.error(erro);
+                alert("Erro ao excluir cliente.");
+            }
+        }
+
         function copiarDetalhes(nome, email, telefone, projeto) {
-            let texto = `Nome: ${nome}\nProjeto: ${projeto}\nE-mail: ${email}\nTelefone: ${telefone}`;
-            navigator.clipboard.writeText(texto);
+            let ztexto = "Nome: " + nome + "\nProjeto: " + projeto + "\nE-mail: " + email + "\nTelefone: " + telefone;
+            navigator.clipboard.writeText(ztexto);
             alert("Dados copiados para a área de transferência!");
         }
     </script>
