@@ -348,9 +348,6 @@
         const ADMIN_HASH = "QExldmkxNjEx";
 
         // Senhas Iniciais Obfuscadas (Base64):
-        // user1 (Levi) -> levi1611 -> bGV2aTE2MTE=
-        // user2 (Selma) -> selma1611 -> c2VsbWExNjEx
-        // user3 (Ariany) -> ariany1611 -> YXJpYW55MTYxMQ==
         const defaultProfiles = {
             user1: { id: 'user1', name: 'Levi', passHash: 'bGV2aTE2MTE=', photo: 'https://ui-avatars.com/api/?name=Levi&background=E0E7FF&color=3730A3&bold=true' },
             user2: { id: 'user2', name: 'Selma', passHash: 'c2VsbWExNjEx', photo: 'https://ui-avatars.com/api/?name=Selma&background=FCE7F3&color=9D174D&bold=true' },
@@ -361,7 +358,9 @@
         let activeUserId = null;
         let listaClientes = [];
         let clientesFiltrados = [];
+        
         let secretClicks = 0;
+        let secretTimeout = null;
 
         // ======= INICIALIZAÇÃO E SESSÃO (3 DIAS) =======
         window.onload = function() {
@@ -369,11 +368,11 @@
             let sessionExpiry = localStorage.getItem('crm_santos_session_expiry');
             let now = new Date().getTime();
 
-            // Verifica se tem usuario salvo E se a sessão ainda está válida (dentro dos 3 dias)
-            if(storedUser && profiles[storedUser] && sessionExpiry && now < parseInt(sessionExpiry)) {
-                iniciarSessao(storedUser, false); // Inicia sem renovar os 3 dias pra manter o vencimento original
+            // Proteção contra lixo no cache ("null" em string) gerado pelo erro anterior
+            if(storedUser && storedUser !== "null" && profiles[storedUser] && sessionExpiry && now < parseInt(sessionExpiry)) {
+                iniciarSessao(storedUser, false);
             } else {
-                logout(); // Limpa e manda pro login
+                logout();
             }
         };
 
@@ -412,15 +411,16 @@
 
         function closePasswordModal() {
             document.getElementById('passwordModal').classList.add('hidden');
-            tempAttemptUser = null;
+            // NÃO apagar tempAttemptUser aqui para não quebrar a lógica do tryLogin!
         }
 
         function tryLogin() {
             const pass = document.getElementById('inputPassword').value;
-            // Codifica a entrada para comparar com o hash(base64) salvo
             if(btoa(pass) === profiles[tempAttemptUser].passHash) {
+                let u = tempAttemptUser; // Salva quem é antes de fechar e limpar
                 closePasswordModal();
-                iniciarSessao(tempAttemptUser, true); // true = novo login (gera 3 dias)
+                tempAttemptUser = null; 
+                iniciarSessao(u, true); // true = novo login (gera 3 dias)
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
@@ -430,7 +430,6 @@
             activeUserId = userId;
             localStorage.setItem('crm_santos_activeUser', activeUserId);
             
-            // Se for um login novo, define a validade para 3 dias a partir de agora
             if(novoLogin) {
                 let expireTime = new Date().getTime() + (3 * 24 * 60 * 60 * 1000);
                 localStorage.setItem('crm_santos_session_expiry', expireTime.toString());
@@ -478,11 +477,15 @@
         // ======= SECRET CONFIG MODAL (ADMIN) =======
         function logoSecretClick() {
             secretClicks++;
+            clearTimeout(secretTimeout); // Limpa o timer anterior pra não engolir cliques
+            
             if(secretClicks >= 5) {
                 secretClicks = 0;
                 openAdminPasswordModal();
+            } else {
+                // Reseta a contagem só se passar 2 segundos sem nenhum clique
+                secretTimeout = setTimeout(() => { secretClicks = 0; }, 2000);
             }
-            setTimeout(() => { secretClicks = 0; }, 2000);
         }
 
         function openAdminPasswordModal() {
@@ -511,7 +514,6 @@
             container.innerHTML = '';
             
             Object.values(profiles).forEach((p, idx) => {
-                // Decodifica a senha apenas para mostrar pro Admin editar
                 let decodedPass = "";
                 try { decodedPass = atob(p.passHash); } catch(e) { decodedPass = ""; }
                 
@@ -547,7 +549,6 @@
             Object.values(profiles).forEach(p => {
                 p.name = document.getElementById(`cfg_name_${p.id}`).value;
                 p.photo = document.getElementById(`cfg_photo_${p.id}`).value || `https://ui-avatars.com/api/?name=${p.name}`;
-                // Codifica e salva a nova senha para não ficar legível no LocalStorage/Código
                 const novaSenha = document.getElementById(`cfg_pass_${p.id}`).value;
                 p.passHash = btoa(novaSenha); 
             });
