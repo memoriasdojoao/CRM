@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CRM Santos</title>
     
-    <!-- PWA & Icons -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CRM Santos">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%234F46E5'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%234F46E5'/%3E%3Ctext x='50' y='65' font-family='Arial' font-size='50' font-weight='bold' fill='white' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,9 +21,8 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen selection:bg-indigo-100 selection:text-indigo-900">
 
-    <!-- TELA DE LOGIN (SELEÇÃO DE PERFIL) -->
+    <!-- TELA DE LOGIN -->
     <div id="loginScreen" class="fixed inset-0 bg-gradient-to-br from-slate-900 to-indigo-900 z-50 flex flex-col items-center justify-center p-4">
-        
         <div class="mb-10 text-center flex flex-col items-center">
             <svg class="w-20 h-20 mb-4 text-white" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="100" height="100" rx="24" fill="currentColor" fill-opacity="0.1"/>
@@ -41,17 +38,13 @@
 
         <div id="profilesContainer" class="flex flex-wrap justify-center gap-6 max-w-3xl"></div>
 
-        <!-- Modal de Senha Perfil -->
         <div id="passwordModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm transform transition-all text-center">
                 <img id="loginAvatar" src="" class="w-16 h-16 rounded-full mx-auto border-4 border-indigo-100 shadow-sm mb-4 object-cover">
                 <h3 class="text-lg font-bold text-slate-900 mb-1">Olá, <span id="loginName"></span></h3>
                 <p class="text-sm text-slate-500 mb-6">Digite sua senha para acessar</p>
-                
                 <input type="password" id="inputPassword" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-center text-lg tracking-widest focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition mb-4" placeholder="••••" onkeyup="if(event.key === 'Enter') tryLogin()">
-                
                 <p id="loginError" class="text-rose-500 text-xs font-semibold mb-4 hidden">Senha incorreta!</p>
-                
                 <div class="flex space-x-3">
                     <button onclick="closePasswordModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 rounded-xl text-sm font-semibold transition">Cancelar</button>
                     <button onclick="tryLogin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-semibold transition shadow-md">Entrar</button>
@@ -59,17 +52,13 @@
             </div>
         </div>
 
-        <!-- Modal de Senha Admin (Secreto) -->
         <div id="adminPasswordModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 z-[55]">
             <div class="bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 p-6 w-full max-w-sm transform transition-all text-center">
                 <div class="text-amber-400 mb-4 text-3xl"><i class="fa-solid fa-lock"></i></div>
                 <h3 class="text-lg font-bold text-white mb-1">Acesso Restrito</h3>
                 <p class="text-sm text-slate-400 mb-6">Insira a chave de administrador</p>
-                
                 <input type="password" id="inputAdminPassword" class="w-full bg-slate-900 border border-slate-600 text-white rounded-xl px-4 py-3 text-center text-lg tracking-widest focus:bg-slate-800 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 focus:outline-none transition mb-4" placeholder="••••••••" onkeyup="if(event.key === 'Enter') checkAdminPassword()">
-                
                 <p id="adminError" class="text-rose-400 text-xs font-semibold mb-4 hidden">Acesso negado!</p>
-                
                 <div class="flex space-x-3">
                     <button onclick="closeAdminPasswordModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2.5 rounded-xl text-sm font-semibold transition">Cancelar</button>
                     <button onclick="checkAdminPassword()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-900 py-2.5 rounded-xl text-sm font-bold transition shadow-md">Verificar</button>
@@ -78,7 +67,7 @@
         </div>
     </div>
 
-    <!-- TELA PRINCIPAL (CRM) -->
+    <!-- TELA PRINCIPAL -->
     <div id="mainApp" class="hidden">
         <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm glass-card">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -146,10 +135,9 @@
                 </div>
             </div>
 
-            <!-- Toolbar de Filtros & Ações (Botões com mesmo tamanho e nome 'E-mail') -->
+            <!-- Toolbar -->
             <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm mb-6">
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                    
                     <div class="relative w-full lg:w-1/3">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 pointer-events-none">
                             <i class="fa-solid fa-magnifying-glass"></i>
@@ -183,19 +171,18 @@
                         </select>
                     </div>
 
-                    <!-- Botões Exportar e E-mail com largura fixa idêntica -->
                     <div class="flex items-center gap-2 ml-auto w-full lg:w-auto justify-end border-t lg:border-t-0 pt-3 lg:pt-0 mt-1 lg:mt-0 border-slate-100">
-                        <button onclick="exportarPlanilha()" class="w-36 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm" title="Exportar resultado para Excel/CSV">
+                        <button onclick="exportarPlanilha()" class="w-36 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm">
                             <i class="fa-solid fa-file-excel"></i> <span>Exportar</span>
                         </button>
-                        <button onclick="enviarEmailMassa()" class="w-36 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm" title="Enviar email oculto (BCC) para os leads filtrados">
+                        <button onclick="enviarEmailMassa()" class="w-36 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm">
                             <i class="fa-solid fa-envelope"></i> <span>E-mail</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Tabela Principal -->
+            <!-- Tabela -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="overflow-x-auto hide-scroll">
                     <table class="w-full text-left border-collapse whitespace-nowrap">
@@ -219,11 +206,10 @@
                     </table>
                 </div>
             </div>
-
         </main>
     </div>
 
-    <!-- Modal Adicionar/Editar Cliente -->
+    <!-- Modal Adicionar/Editar -->
     <div id="modalCliente" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto hide-scroll border border-slate-100 transform transition-all">
             <div class="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 flex items-center justify-between z-10">
@@ -311,41 +297,21 @@
         </div>
     </div>
 
-    <!-- Modal de Configuração Secreta (Admin) -->
-    <div id="configModal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center p-4 z-[60]">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md transform transition-all">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h3 class="text-xl font-black text-slate-900">Configurações de Perfis</h3>
-                    <p class="text-xs font-medium text-slate-500 mt-1">Gerencie os usuários, fotos e senhas.</p>
-                </div>
-                <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-700 transition bg-slate-100 rounded-full w-8 h-8 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <div id="configFormContainer" class="space-y-6 max-h-[60vh] overflow-y-auto hide-scroll px-1"></div>
-            
-            <button onclick="saveConfigs()" class="w-full mt-6 bg-slate-900 hover:bg-black text-white py-3 rounded-xl text-sm font-bold transition shadow-lg">Salvar Alterações</button>
-        </div>
-    </div>
-
-
+    <!-- Script JS do CRM -->
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxWEgRAYuGBJ6Wbpdf7MjwpS3-iqwdldHqCAFteYLOS8ONpm_V-rZwdoozeCULuMFrc/exec";
         const ADMIN_HASH = "QExldmkxNjEx";
 
-        const defaultProfiles = {
-            user1: { id: 'user1', name: 'Levi', passHash: 'bGV2aTE2MTE=', photo: 'https://ui-avatars.com/api/?name=Levi&background=E0E7FF&color=3730A3&bold=true' },
-            user2: { id: 'user2', name: 'Selma', passHash: 'c2VsbWExNjEx', photo: 'https://ui-avatars.com/api/?name=Selma&background=FCE7F3&color=9D174D&bold=true' },
-            user3: { id: 'user3', name: 'Ariany', passHash: 'YXJpYW55MTYxMQ==', photo: 'https://ui-avatars.com/api/?name=Ariany&background=D1FAE5&color=065F46&bold=true' }
+                const defaultProfiles = {
+            user1: { id: 'user1', name: 'Levi', passHash: 'bGV2aTE2MTE=', photo: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80' },
+            user2: { id: 'user2', name: 'Selma', passHash: 'c2VsbWExNjEx', photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&auto=format&fit=crop&q=80' },
+            user3: { id: 'user3', name: 'Ariany', passHash: 'YXJpYW55MTYxMQ==', photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80' }
         };
 
         let profiles = JSON.parse(localStorage.getItem('crm_santos_profiles')) || defaultProfiles;
         let activeUserId = null;
         let listaClientes = [];
         let clientesFiltrados = [];
-        
-        let secretClicks = 0;
-        let secretTimeout = null;
 
         window.onload = function() {
             let storedUser = localStorage.getItem('crm_santos_activeUser');
@@ -362,16 +328,13 @@
         function renderLoginScreen() {
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('mainApp').classList.add('hidden');
-            
             const container = document.getElementById('profilesContainer');
             container.innerHTML = '';
-            
             Object.values(profiles).forEach(p => {
                 container.innerHTML += `
-                    <div onclick="openPasswordModal('${p.id}')" class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 p-6 rounded-3xl cursor-pointer transform hover:-translate-y-2 transition-all duration-300 w-36 sm:w-44 text-center group shadow-xl">
+                    <div onclick="openPasswordModal('${p.id}')" class="bg-white/10 hover:bg-white/25 backdrop-blur-md border border-white/20 p-6 rounded-3xl cursor-pointer transform hover:-translate-y-2 transition-all duration-300 w-36 sm:w-44 text-center group shadow-xl">
                         <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4">
                             <img src="${p.photo}" class="w-full h-full rounded-full object-cover border-4 border-indigo-500/50 group-hover:border-indigo-400 shadow-lg transition">
-                            <div class="absolute inset-0 rounded-full ring-inset ring-2 ring-white/20"></div>
                         </div>
                         <h3 class="text-white font-bold text-lg sm:text-xl tracking-wide">${p.name}</h3>
                     </div>
@@ -410,19 +373,15 @@
         function iniciarSessao(userId, novoLogin) {
             activeUserId = userId;
             localStorage.setItem('crm_santos_activeUser', activeUserId);
-            
             if(novoLogin) {
                 let expireTime = new Date().getTime() + (3 * 24 * 60 * 60 * 1000);
                 localStorage.setItem('crm_santos_session_expiry', expireTime.toString());
             }
-            
             const user = profiles[activeUserId];
             document.getElementById('labelUserStat').innerText = user.name;
             document.getElementById('headerAvatar').src = user.photo;
-            
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            
             carregarClientes();
         }
 
@@ -439,7 +398,7 @@
             if(v === '') { i.value = ''; return; }
             v = (v/100).toFixed(2) + '';
             v = v.replace(".", ",");
-            v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+            v = v.replace(/(\d)(?=(\d{{3}})+(?!\d))/g, '$1.');
             i.value = 'R$ ' + v;
         }
 
@@ -454,22 +413,20 @@
             return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
+        let secretClicks = 0;
+        let secretTimeout = null;
         function logoSecretClick() {
             secretClicks++;
             clearTimeout(secretTimeout);
             if(secretClicks >= 5) {
                 secretClicks = 0;
-                openAdminPasswordModal();
+                document.getElementById('inputAdminPassword').value = '';
+                document.getElementById('adminError').classList.add('hidden');
+                document.getElementById('adminPasswordModal').classList.remove('hidden');
+                setTimeout(() => document.getElementById('inputAdminPassword').focus(), 100);
             } else {
                 secretTimeout = setTimeout(() => { secretClicks = 0; }, 2000);
             }
-        }
-
-        function openAdminPasswordModal() {
-            document.getElementById('inputAdminPassword').value = '';
-            document.getElementById('adminError').classList.add('hidden');
-            document.getElementById('adminPasswordModal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('inputAdminPassword').focus(), 100);
         }
 
         function closeAdminPasswordModal() {
@@ -480,62 +437,15 @@
             const pass = document.getElementById('inputAdminPassword').value;
             if(btoa(pass) === ADMIN_HASH) {
                 closeAdminPasswordModal();
-                openConfigModal();
+                alert("Acesso autorizado de administrador.");
             } else {
                 document.getElementById('adminError').classList.remove('hidden');
             }
         }
 
-        function openConfigModal() {
-            const container = document.getElementById('configFormContainer');
-            container.innerHTML = '';
-            Object.values(profiles).forEach((p, idx) => {
-                let decodedPass = "";
-                try { decodedPass = atob(p.passHash); } catch(e) { decodedPass = ""; }
-                container.innerHTML += `
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                        <h4 class="font-bold text-slate-800 mb-3 text-sm flex items-center"><i class="fa-solid fa-user-gear mr-2 text-indigo-500"></i> Perfil ${idx+1}</h4>
-                        <div class="space-y-3">
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-500 uppercase">Nome (Aba na Planilha)</label>
-                                <input type="text" id="cfg_name_${p.id}" value="${p.name}" class="w-full text-sm px-3 py-2 border rounded-lg mt-1 font-semibold">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-500 uppercase">URL da Foto Perfil</label>
-                                <input type="text" id="cfg_photo_${p.id}" value="${p.photo}" class="w-full text-xs px-3 py-2 border rounded-lg mt-1 text-slate-500" placeholder="https://link-da-imagem.com/foto.jpg">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-500 uppercase">Nova Senha</label>
-                                <input type="text" id="cfg_pass_${p.id}" value="${decodedPass}" class="w-full text-sm px-3 py-2 border rounded-lg mt-1">
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            document.getElementById('configModal').classList.remove('hidden');
-        }
-
-        function closeConfigModal() {
-            document.getElementById('configModal').classList.add('hidden');
-        }
-
-        function saveConfigs() {
-            Object.values(profiles).forEach(p => {
-                p.name = document.getElementById(`cfg_name_${p.id}`).value;
-                p.photo = document.getElementById(`cfg_photo_${p.id}`).value || `https://ui-avatars.com/api/?name=${p.name}`;
-                const novaSenha = document.getElementById(`cfg_pass_${p.id}`).value;
-                p.passHash = btoa(novaSenha); 
-            });
-            localStorage.setItem('crm_santos_profiles', JSON.stringify(profiles));
-            closeConfigModal();
-            alert("Configurações salvas! A página será atualizada.");
-            location.reload();
-        }
-
         async function carregarClientes() {
             const btn = document.getElementById('btnAtualizar');
             btn.classList.add('fa-spin');
-            
             try {
                 let currentUserName = profiles[activeUserId].name;
                 let resposta = await fetch(`${WEB_APP_URL}?aba=${encodeURIComponent(currentUserName)}`);
@@ -601,7 +511,7 @@
                 return;
             }
 
-            dados.forEach((cliente, _) => {
+            dados.forEach((cliente) => {
                 let badgeClass = "bg-blue-50 text-blue-700 border-blue-200";
                 if (cliente.Status === 'Em Negociação') badgeClass = "bg-purple-50 text-purple-700 border-purple-200";
                 if (cliente.Status === 'Fechado') badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
@@ -668,19 +578,19 @@
                 alert("Nenhum cliente para exportar.");
                 return;
             }
-            
             let csvContent = "data:text/csv;charset=utf-8,";
             let cabecalhos = ["Nome", "Email", "Telefone", "Projeto", "Valor Estimado", "Bairro", "Zona", "Status", "Tratativa"];
-            csvContent += cabecalhos.join(";") + "\r\n";
-            
+            csvContent += cabecalhos.join(";") + "
+";
             clientesFiltrados.forEach(c => {
                 let linha = [
                     c.Nome, c.Email, c.Telefone, c.Projeto, c.ValorEstimado, c.Bairro, c.Zona, c.Status, 
-                    (c.Tratativa || "").replace(/\n/g, " ").replace(/;/g, ",") 
+                    (c.Tratativa || "").replace(/
+/g, " ").replace(/;/g, ",") 
                 ].map(v => `"${v}"`).join(";");
-                csvContent += linha + "\r\n";
+                csvContent += linha + "
+";
             });
-
             var encodedUri = encodeURI(csvContent);
             var link = document.createElement("a");
             link.setAttribute("href", encodedUri);
@@ -701,7 +611,6 @@
 
         function editarCliente(index, event) {
             if(event.target.closest('button')) return;
-
             let c = listaClientes[index];
             document.getElementById('idxLinha').value = index;
             document.getElementById('originalNome').value = c.Nome; 
@@ -715,14 +624,12 @@
             document.getElementById('tratativa').value = c.Tratativa;
             
             let inputV = document.getElementById('valorEstimado');
-            if(String(c.ValorEstimado).includes('R$')) {
-                inputV.value = c.ValorEstimado;
-            } else {
-                inputV.value = c.ValorEstimado;
+            inputV.value = c.ValorEstimado;
+            if(!String(c.ValorEstimado).includes('R$')) {
                 mascaraMoeda(inputV);
             }
 
-            document.getElementById('modalClienteTitulo').innerText = "Editar/Tratativa: " + c.Nome;
+            document.getElementById('modalClienteTitulo').innerText = "Editar: " + c.Nome;
             document.getElementById('btnExcluirModal').classList.remove('hidden');
             document.getElementById('modalCliente').classList.remove('hidden');
         }
@@ -738,13 +645,18 @@
             btn.disabled = true;
 
             const isEdit = document.getElementById('idxLinha').value !== "";
-            const originalNome = document.getElementById('originalNome').value;
+            let originalNome = document.getElementById('originalNome').value;
+            let nomeAtual = document.getElementById('nome').value;
+
+            if(!isEdit) {
+                originalNome = nomeAtual;
+            }
 
             const dadosCliente = {
                 acao: isEdit ? "editar" : "novo",
                 aba: profiles[activeUserId].name,
                 originalNome: originalNome,
-                nome: document.getElementById('nome').value,
+                nome: nomeAtual,
                 email: document.getElementById('email').value,
                 telefone: document.getElementById('telefone').value,
                 projeto: document.getElementById('projeto').value,
@@ -792,7 +704,7 @@
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dadosCell = dadosCliente)
+                    body: JSON.stringify(dadosCliente)
                 });
 
                 fecharModalCliente();
