@@ -191,7 +191,6 @@
 
     <!-- JavaScript da Aplicação -->
     <script>
-        // URL da API do Google Apps Script embutida diretamente
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwUgq9SejA0R0BzHRkYJMBlbfELyewPyhlifpuJ3bLQ-FdBl8cXWNmOERbAu8H-XGrk/exec";
         let usuarioAtual = localStorage.getItem('crm_usuario_ativo') || "Levi";
         let listaClientes = [];
@@ -267,7 +266,7 @@
                         '</span>' +
                     '</td>' +
                     '<td class="py-4 px-6 text-right space-x-2">' +
-                        '<button onclick="copiarDetalhes(\'' + cliente.Nome + '\', \'' + cliente.Email + '\', \'' + cliente.Telefone + '\', \'' + cliente.Projeto + '\')" class="text-slate-400 hover:text-indigo-600 transition" title="Copiar contato">' +
+                        '<button onclick="copiarDetalhes('' + cliente.Nome + '', '' + cliente.Email + '', '' + cliente.Telefone + '', '' + cliente.Projeto + '')" class="text-slate-400 hover:text-indigo-600 transition" title="Copiar contato">' +
                             '<i class="fa-solid fa-copy"></i>' +
                         '</button>' +
                     '</td>' +
