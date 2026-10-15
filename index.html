@@ -185,14 +185,15 @@
                             <option value="Centro">Centro</option>
                         </select>
 
-                        <!-- Filtro de Valores De: / Até: -->
-                        <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 gap-2 text-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:bg-white focus-within:border-indigo-400 transition shadow-sm">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">De:</span>
-                            <input type="text" id="filtroValorMin" placeholder="R$ 0,00" oninput="mascaraMoeda(this); aplicarFiltros()" class="w-24 sm:w-28 bg-transparent text-sm font-bold text-indigo-700 placeholder:text-slate-400 focus:outline-none">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Até:</span>
-                            <input type="text" id="filtroValorMax" placeholder="Sem limite" oninput="mascaraMoeda(this); aplicarFiltros()" class="w-24 sm:w-28 bg-transparent text-sm font-bold text-indigo-700 placeholder:text-slate-400 focus:outline-none">
-                            <button type="button" onclick="limparFiltroValor()" class="text-slate-400 hover:text-rose-500 p-1 transition" title="Limpar filtro de valores">
-                                <i class="fa-solid fa-circle-xmark text-xs"></i>
+                        <!-- Filtro de Valores De: / Até: Proporcional -->
+                        <div class="flex items-center bg-slate-50 border border-slate-200 rounded-xl h-[42px] px-2.5 gap-1.5 text-xs focus-within:ring-2 focus-within:ring-indigo-500 focus-within:bg-white focus-within:border-indigo-400 transition shadow-sm">
+                            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wide">De</span>
+                            <input type="text" id="filtroValorMin" placeholder="R$ 0" oninput="mascaraMoeda(this); aplicarFiltros()" class="w-16 sm:w-20 bg-transparent text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none">
+                            <span class="text-slate-300 font-light">|</span>
+                            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wide">Até</span>
+                            <input type="text" id="filtroValorMax" placeholder="R$ Max" oninput="mascaraMoeda(this); aplicarFiltros()" class="w-16 sm:w-20 bg-transparent text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none">
+                            <button type="button" onclick="limparFiltroValor()" class="text-slate-300 hover:text-rose-500 transition ml-0.5" title="Limpar filtro de valores">
+                                <i class="fa-solid fa-xmark text-xs"></i>
                             </button>
                         </div>
                     </div>
@@ -918,7 +919,7 @@ const defaultProfiles = {
                 }
 
                 let linha = `
-                <tr class="hover:bg-slate-50/90 transition border-b border-slate-100 last:border-0 group cursor-pointer" onclick="editarClientePorId('${cliente.id}', event)">
+                <tr class="hover:bg-slate-50/90 transition border-b border-slate-100 last:border-0 group cursor-pointer" onclick="clicarLinhaTabela('${cliente.id}', event)">
                     <td class="py-4 px-5">
                         <div class="font-bold text-slate-900 group-hover:text-indigo-600 transition">${cliente.Nome}</div>
                         <div class="text-[11px] font-semibold text-slate-500 mt-0.5 uppercase tracking-wide">
@@ -951,13 +952,13 @@ const defaultProfiles = {
                     </td>
                     <td class="py-4 px-5 text-center">
                         <div class="flex items-center justify-center space-x-1.5" onclick="event.stopPropagation()">
-                            <button onclick="copiarDetalhesCliente('${cliente.id}')" class="text-slate-400 hover:text-indigo-600 bg-white hover:bg-indigo-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Copiar informações">
+                            <button type="button" onclick="copiarDetalhesCliente('${cliente.id}'); event.stopPropagation();" class="text-slate-400 hover:text-indigo-600 bg-white hover:bg-indigo-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Copiar informações">
                                 <i class="fa-regular fa-copy"></i>
                             </button>
-                            <button onclick="editarClientePorId('${cliente.id}', event)" class="text-slate-400 hover:text-amber-600 bg-white hover:bg-amber-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Editar cliente">
+                            <button type="button" onclick="abrirEdicaoCliente('${cliente.id}'); event.stopPropagation();" class="text-slate-400 hover:text-amber-600 bg-white hover:bg-amber-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Editar cliente">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
-                            <button onclick="confirmarExclusaoRapida('${cliente.id}')" class="text-slate-400 hover:text-rose-600 bg-white hover:bg-rose-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Excluir cliente">
+                            <button type="button" onclick="confirmarExclusaoRapida('${cliente.id}'); event.stopPropagation();" class="text-slate-400 hover:text-rose-600 bg-white hover:bg-rose-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Excluir cliente">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </div>
@@ -1030,8 +1031,7 @@ const defaultProfiles = {
             setTimeout(() => document.getElementById('nome').focus(), 100);
         }
 
-        function editarClientePorId(id, event) {
-            if(event && event.target && event.target.closest('button')) return;
+        function abrirEdicaoCliente(id) {
             let c = listaClientes.find(item => item.id === id);
             if(!c) return;
 
@@ -1052,6 +1052,18 @@ const defaultProfiles = {
             document.getElementById('modalClienteTitulo').innerText = "Editar: " + c.Nome;
             document.getElementById('btnExcluirModal').classList.remove('hidden');
             document.getElementById('modalCliente').classList.remove('hidden');
+        }
+
+        function clicarLinhaTabela(id, event) {
+            // Se o clique veio de qualquer botão de ação ou link, ignora o clique na linha
+            if (event && event.target && (event.target.closest('button') || event.target.closest('a'))) {
+                return;
+            }
+            abrirEdicaoCliente(id);
+        }
+
+        function editarClientePorId(id, event) {
+            abrirEdicaoCliente(id);
         }
 
         function fecharModalCliente() {
