@@ -88,6 +88,11 @@
                         <i class="fa-solid fa-right-from-bracket text-slate-400 hover:text-rose-500 transition text-xs ml-1"></i>
                     </div>
                     
+                    <button onclick="abrirPainel()" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition shadow-sm flex items-center space-x-2" title="Abrir painel">
+                        <i class="fa-solid fa-chart-column text-indigo-600"></i>
+                        <span class="hidden sm:inline">Painel</span>
+                    </button>
+
                     <button onclick="abrirModalCliente()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 rounded-xl text-sm font-semibold transition shadow-sm shadow-indigo-100 flex items-center space-x-2">
                         <i class="fa-solid fa-plus"></i>
                         <span class="hidden sm:inline">Novo Cliente</span>
@@ -100,10 +105,47 @@
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <main id="paginaClientes" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             
-            <!-- Painel inicial do perfil -->
-            <section id="painelMetricas" class="mb-6 space-y-4"></section>
+            <!-- Cards de Métricas Clicáveis -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div onclick="filtrarPorCard('')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-indigo-400 hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-indigo-600 transition">Total de Clientes</p>
+                        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                    </div>
+                    <h4 id="statTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
+                </div>
+                <div onclick="filtrarPorCard('Lead novo')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-amber-400 hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-amber-600 transition">Leads Novos</p>
+                        <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                            <i class="fa-solid fa-bullseye"></i>
+                        </div>
+                    </div>
+                    <h4 id="statLeads" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
+                </div>
+                <div onclick="filtrarPorCard('Negociação')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-purple-400 hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-purple-600 transition">Em Negociação</p>
+                        <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
+                            <i class="fa-solid fa-handshake"></i>
+                        </div>
+                    </div>
+                    <h4 id="statNegociacao" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
+                </div>
+                <div onclick="filtrarPorCard('Venda realizada')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-emerald-400 hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-emerald-600 transition">Vendas</p>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                    </div>
+                    <h4 id="statFechado" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
+                </div>
+            </div>
 
             <!-- Toolbar de Filtros -->
             <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm mb-6">
@@ -185,6 +227,14 @@
                     </table>
                 </div>
             </div>
+        </main>
+
+        <!-- PÁGINA DO PAINEL -->
+        <main id="paginaPainel" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <button type="button" onclick="irParaClientes()" class="mb-4 inline-flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-xl text-sm font-semibold transition shadow-sm">
+                <i class="fa-solid fa-arrow-left"></i> Voltar para clientes
+            </button>
+            <section id="painelMetricas" class="space-y-4"></section>
         </main>
     </div>
 
@@ -455,6 +505,7 @@ const defaultProfiles = {
         }
 
         function logout() {
+            history.replaceState(null, '', location.pathname + location.search); aplicarRota();
             localStorage.removeItem('crm_santos_activeUser');
             localStorage.removeItem('crm_santos_session_expiry');
             activeUserId = null;
@@ -649,9 +700,40 @@ const defaultProfiles = {
             }
         }
 
+        // ===== Navegação: página de clientes <-> página do painel =====
+        let painelPeloBotao = false;
+
+        function aplicarRota() {
+            const noPainel = location.hash === '#painel';
+            document.getElementById('paginaClientes').classList.toggle('hidden', noPainel);
+            document.getElementById('paginaPainel').classList.toggle('hidden', !noPainel);
+            window.scrollTo(0, 0);
+        }
+
+        function abrirPainel() {
+            painelPeloBotao = true;
+            location.hash = 'painel';
+        }
+
+        function irParaClientes() {
+            if (location.hash !== '#painel') return;
+            if (painelPeloBotao) {
+                painelPeloBotao = false;
+                history.back();
+            } else {
+                history.replaceState(null, '', location.pathname + location.search);
+                aplicarRota();
+            }
+        }
+
+        window.addEventListener('hashchange', aplicarRota);
+        window.addEventListener('load', aplicarRota);
+
+        // Clicar num card/botão do painel leva para a lista já filtrada
         function filtrarPorCard(statusDesejado) {
             document.getElementById('filtroStatus').value = statusDesejado;
             aplicarFiltros();
+            irParaClientes();
         }
 
         function aplicarFiltros() {
@@ -792,6 +874,15 @@ const defaultProfiles = {
         }
 
         function atualizarMetricas(lista) {
+            const n = st => lista.filter(c => c.Status === st).length;
+            document.getElementById('statTotal').innerText = lista.length;
+            document.getElementById('statLeads').innerText = n('Lead novo');
+            document.getElementById('statNegociacao').innerText = n('Negociação');
+            document.getElementById('statFechado').innerText = n('Venda realizada');
+            renderizarPainel(lista);
+        }
+
+        function renderizarPainel(lista) {
             const el = document.getElementById('painelMetricas');
             if (!el) return;
 
