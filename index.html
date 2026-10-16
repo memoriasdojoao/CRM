@@ -102,45 +102,8 @@
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             
-            <!-- Cards de Métricas Clicáveis -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div onclick="filtrarPorCard('')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-indigo-400 hover:shadow-md transition group">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-indigo-600 transition">Total de Clientes</p>
-                        <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                            <i class="fa-solid fa-users"></i>
-                        </div>
-                    </div>
-                    <h4 id="statTotal" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
-                </div>
-                <div onclick="filtrarPorCard('Lead')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-amber-400 hover:shadow-md transition group">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-amber-600 transition">Leads Ativos</p>
-                        <div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
-                            <i class="fa-solid fa-bullseye"></i>
-                        </div>
-                    </div>
-                    <h4 id="statLeads" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
-                </div>
-                <div onclick="filtrarPorCard('Em Negociação')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-purple-400 hover:shadow-md transition group">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-purple-600 transition">Em Negociação</p>
-                        <div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center text-purple-600">
-                            <i class="fa-solid fa-handshake"></i>
-                        </div>
-                    </div>
-                    <h4 id="statNegociacao" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
-                </div>
-                <div onclick="filtrarPorCard('Fechado')" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between cursor-pointer hover:border-emerald-400 hover:shadow-md transition group">
-                    <div class="flex justify-between items-start mb-2">
-                        <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider group-hover:text-emerald-600 transition">Fechados</p>
-                        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-                            <i class="fa-solid fa-circle-check"></i>
-                        </div>
-                    </div>
-                    <h4 id="statFechado" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h4>
-                </div>
-            </div>
+            <!-- Painel inicial do perfil -->
+            <section id="painelMetricas" class="mb-6 space-y-4"></section>
 
             <!-- Toolbar de Filtros -->
             <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm mb-6">
@@ -155,9 +118,14 @@
                     <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                         <select id="filtroStatus" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                             <option value="">Status: Todos</option>
-                            <option value="Lead">Lead</option>
-                            <option value="Em Negociação">Em Negociação</option>
-                            <option value="Fechado">Fechado</option>
+                            <option value="Lead novo">Lead novo</option>
+                            <option value="Primeiro contato">Primeiro contato</option>
+                            <option value="Em atendimento">Em atendimento</option>
+                            <option value="Visita agendada">Visita agendada</option>
+                            <option value="Visita realizada">Visita realizada</option>
+                            <option value="Negociação">Negociação</option>
+                            <option value="Venda realizada">Venda realizada</option>
+                            <option value="Não responde">Não responde</option>
                         </select>
 
                         <select id="filtroZona" onchange="aplicarFiltros()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
@@ -281,9 +249,14 @@
                     <div class="sm:col-span-1">
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Status</label>
                         <select id="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
-                            <option value="Lead">Lead</option>
-                            <option value="Em Negociação">Em Negociação</option>
-                            <option value="Fechado">Fechado</option>
+                            <option value="Lead novo">Lead novo</option>
+                            <option value="Primeiro contato">Primeiro contato</option>
+                            <option value="Em atendimento">Em atendimento</option>
+                            <option value="Visita agendada">Visita agendada</option>
+                            <option value="Visita realizada">Visita realizada</option>
+                            <option value="Negociação">Negociação</option>
+                            <option value="Venda realizada">Venda realizada</option>
+                            <option value="Não responde">Não responde</option>
                         </select>
                     </div>
                     <div class="sm:col-span-2">
@@ -311,6 +284,46 @@
     <!-- Script JS do CRM -->
     <script>
         const WEB_APP_URL ="https://script.google.com/macros/s/AKfycbxWEgRAYuGBJ6Wbpdf7MjwpS3-iqwdldHqCAFteYLOS8ONpm_V-rZwdoozeCULuMFrc/exec";
+
+        // ===== Status e painel =====
+        const STATUS_COR = {
+            'Lead novo': 'bg-blue-50 text-blue-700 border-blue-200',
+            'Primeiro contato': 'bg-sky-50 text-sky-700 border-sky-200',
+            'Em atendimento': 'bg-amber-50 text-amber-700 border-amber-200',
+            'Visita agendada': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            'Visita realizada': 'bg-violet-50 text-violet-700 border-violet-200',
+            'Negociação': 'bg-purple-50 text-purple-700 border-purple-200',
+            'Venda realizada': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            'Não responde': 'bg-rose-50 text-rose-700 border-rose-200'
+        };
+        const STATUS_LISTA = Object.keys(STATUS_COR);
+        const STATUS_LEGADO = { 'lead': 'Lead novo', 'em negociação': 'Negociação', 'em negociacao': 'Negociação', 'fechado': 'Venda realizada' };
+
+        // Converte nomes antigos (Lead, Em Negociação, Fechado) para os novos
+        function normalizarStatus(v) {
+            let s = String(v || '').trim();
+            if (!s) return 'Lead novo';
+            let k = s.toLowerCase();
+            return STATUS_LEGADO[k] || STATUS_LISTA.find(x => x.toLowerCase() === k) || s;
+        }
+
+        // Histórico de mudanças de status: [{ s: 'Visita realizada', d: '2026-10-16T...' }]
+        function parseHistorico(v) {
+            try {
+                let a = typeof v === 'string' ? JSON.parse(v) : v;
+                return Array.isArray(a) ? a.filter(e => e && e.s) : [];
+            } catch (e) { return []; }
+        }
+
+        // Lê datas em ISO, dd/mm/aaaa ou dd/mm/aaaa hh:mm:ss
+        function parseDataFlex(v) {
+            if (!v) return null;
+            if (v instanceof Date) return isNaN(v) ? null : v;
+            let t = String(v).trim();
+            let m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ ,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+            let d = m ? new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0)) : new Date(t);
+            return isNaN(d) ? null : d;
+        }
         
         
         function gerarAvatarSVG(nome) {
@@ -598,9 +611,10 @@ const defaultProfiles = {
                             ValorEstimado: (item['Valor estimado'] !== undefined ? item['Valor estimado'] : (item.ValorEstimado || item.valorEstimado || '0')),
                             Bairro: (item.Bairro || item.bairro || '').trim(),
                             Zona: (item.Zona || item.zona || '').trim(),
-                            Status: (item.Status || item.status || 'Lead').trim(),
+                            Status: normalizarStatus(item.Status || item.status),
                             Tratativa: (item.Tratativa || item.tratativa || '').trim(),
-                            Data: item.Data || item.data || ''
+                            Data: item.Data || item.data || '',
+                            Historico: parseHistorico(item.Historico || item.historico)
                         };
 
                         // Sobrescreve com a versão mais recente
@@ -608,6 +622,13 @@ const defaultProfiles = {
                     });
 
                     // Inverte a lista para exibir os mais recentes no topo
+                    // Se a planilha ainda não devolve o histórico, preserva o que já está salvo neste navegador
+                    let anteriores = new Map(listaClientes.map(c => [(c.Nome || '').trim().toLowerCase(), c]));
+                    mapPorCliente.forEach((c, k) => {
+                        let a = anteriores.get(k);
+                        if (a && a.Historico && a.Historico.length && !c.Historico.length) c.Historico = a.Historico;
+                    });
+
                     listaClientes = Array.from(mapPorCliente.values()).reverse();
                     salvarCacheLocal();
                     aplicarFiltros(); 
@@ -708,9 +729,7 @@ const defaultProfiles = {
             }
 
             dados.forEach((cliente) => {
-                let badgeClass ="bg-blue-50 text-blue-700 border-blue-200";
-                if (cliente.Status === 'Em Negociação') badgeClass ="bg-purple-50 text-purple-700 border-purple-200";
-                if (cliente.Status === 'Fechado') badgeClass ="bg-emerald-50 text-emerald-700 border-emerald-200";
+                let badgeClass = STATUS_COR[cliente.Status] || "bg-slate-50 text-slate-700 border-slate-200";
                 
                 let valorFmt = formatarMoedaView(cliente.ValorEstimado);
                 let linkWhats = montarLinkWhatsApp(cliente.Telefone);
@@ -772,11 +791,61 @@ const defaultProfiles = {
             });
         }
 
-        function atualizarMetricas(dadosBase) {
-            document.getElementById('statTotal').innerText = dadosBase.length;
-            document.getElementById('statLeads').innerText = dadosBase.filter(c => c.Status === 'Lead').length;
-            document.getElementById('statNegociacao').innerText = dadosBase.filter(c => c.Status === 'Em Negociação').length;
-            document.getElementById('statFechado').innerText = dadosBase.filter(c => c.Status === 'Fechado').length;
+        function atualizarMetricas(lista) {
+            const el = document.getElementById('painelMetricas');
+            if (!el) return;
+
+            // Períodos: "7 dias" = hoje + 6 dias anteriores; "30 dias" = hoje + 29 anteriores
+            const inicio = d => { let x = new Date(); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - d); return x; };
+            const hoje = inicio(0), d7 = inicio(6), d30 = inicio(29), tudo = new Date(0);
+            const total = lista.length;
+
+            const criados = lista.map(c => parseDataFlex(c.Data));
+            const leadsDesde = s => criados.filter(d => d && d >= s).length;
+
+            const ultimaData = (c, st) => { let e = (c.Historico || []).filter(x => x.s === st && x.d).pop(); return e ? new Date(e.d) : null; };
+            // Visita realizada: conta quem passou por esse status (depois da visita o cliente avança de etapa)
+            const visitou = (c, s) => (c.Historico || []).some(e => e.s === 'Visita realizada' && e.d && new Date(e.d) >= s);
+            const visitasDesde = s => lista.filter(c => visitou(c, s)).length;
+            const visitasTotal = lista.filter(c => c.Status === 'Visita realizada' || (c.Historico || []).some(e => e.s === 'Visita realizada')).length;
+            // Não responde: conta quem está nesse status agora, pela data em que entrou nele
+            const naoResp = lista.filter(c => c.Status === 'Não responde');
+            const naoRespDesde = s => naoResp.filter(c => { let d = ultimaData(c, 'Não responde'); return d && d >= s; }).length;
+
+            const vendas = lista.filter(c => c.Status === 'Venda realizada').length;
+            const mdc = (a, b) => b ? mdc(b, a % b) : a;
+            const razao = total === 0 ? '—' : vendas === 0 ? `0/${total}` : `${vendas / mdc(vendas, total)}/${total / mdc(vendas, total)}`;
+            const pct = total ? (vendas / total * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : '';
+
+            const card = (rot, val, sub, filtro) => `
+                <div ${filtro !== undefined ? `onclick="filtrarPorCard('${filtro}')"` : ''} class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm ${filtro !== undefined ? 'cursor-pointer hover:border-indigo-400 hover:shadow-md transition' : ''}">
+                    <p class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">${rot}</p>
+                    <h4 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">${val}</h4>
+                    ${sub ? `<p class="text-[11px] text-slate-500 mt-0.5">${sub}</p>` : ''}
+                </div>`;
+            const bloco = (titulo, icone, cards) => `
+                <div>
+                    <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2"><i class="${icone} mr-1.5"></i>${titulo}</h3>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">${cards}</div>
+                </div>`;
+
+            const semDataLead = criados.filter(d => !d).length;
+            const semDataStatus = (visitasTotal - visitasDesde(tudo)) + (naoResp.length - naoRespDesde(tudo));
+            let aviso = [];
+            if (semDataLead) aviso.push(`${semDataLead} cliente(s) sem data de cadastro entram só no Geral`);
+            if (semDataStatus) aviso.push(`${semDataStatus} registro(s) de visita/não responde sem data da mudança de status entram só no total`);
+
+            const nome = (profiles[activeUserId] && profiles[activeUserId].name) || '';
+            const chips = [`<button onclick="filtrarPorCard('')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase border bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 transition">Todos · ${total}</button>`]
+                .concat(STATUS_LISTA.map(st => `<button onclick="filtrarPorCard('${st}')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase border ${STATUS_COR[st]} hover:shadow-sm transition">${st} · ${lista.filter(c => c.Status === st).length}</button>`)).join('');
+
+            el.innerHTML = `
+                <h2 class="text-lg font-extrabold text-slate-900">Painel de ${nome}</h2>
+                ${bloco('Leads recebidos', 'fa-solid fa-bullseye', card('Hoje', leadsDesde(hoje)) + card('Últimos 7 dias', leadsDesde(d7)) + card('Últimos 30 dias', leadsDesde(d30)) + card('Geral', total, '', ''))}
+                ${bloco('Visitas', 'fa-solid fa-house-circle-check', card('Agendadas agora', lista.filter(c => c.Status === 'Visita agendada').length, '', 'Visita agendada') + card('Realizadas 7 dias', visitasDesde(d7)) + card('Realizadas 30 dias', visitasDesde(d30)) + card('Realizadas total', visitasTotal))}
+                ${bloco('Conversão e sem resposta', 'fa-solid fa-chart-pie', card('Compra / Leads', razao, `${vendas} venda(s) em ${total} lead(s)${pct ? ' · ' + pct : ''}`, 'Venda realizada') + card('Não responde 7 dias', naoRespDesde(d7), '', 'Não responde') + card('Não responde 30 dias', naoRespDesde(d30), '', 'Não responde') + card('Não responde total', naoResp.length, '', 'Não responde'))}
+                <div class="flex flex-wrap gap-2">${chips}</div>
+                ${aviso.length ? `<p class="text-[11px] text-slate-400">${aviso.join('. ')}.</p>` : ''}`;
         }
 
         function enviarEmailMassa() {
@@ -901,6 +970,16 @@ const defaultProfiles = {
                 return;
             }
 
+            // Histórico de status: só acrescenta uma entrada quando o status realmente muda
+            let clienteAtual = isEdit ? listaClientes.find(c => c.id === clienteId || (originalNome && c.Nome.trim().toLowerCase() === originalNome.toLowerCase())) : null;
+            let historico = (clienteAtual && clienteAtual.Historico) ? clienteAtual.Historico.slice() : [];
+            if (!clienteAtual) {
+                historico.push({ s: statusAtual, d: new Date().toISOString() });
+            } else if (clienteAtual.Status !== statusAtual) {
+                if (!historico.length) historico.push({ s: clienteAtual.Status, d: null });
+                historico.push({ s: statusAtual, d: new Date().toISOString() });
+            }
+
             const dadosPayload = {
                 acao: isEdit ?"editar" :"novo",
                 aba: profiles[activeUserId].name,
@@ -913,7 +992,8 @@ const defaultProfiles = {
                 bairro: bairroAtual,
                 zona: zonaAtual,
                 status: statusAtual,
-                tratativa: tratativaAtual
+                tratativa: tratativaAtual,
+                historico: JSON.stringify(historico)
             };
 
             // 1. ATUALIZAÇÃO IMEDIATA NO ESTADO LOCAL (OPTIMISTIC UI):
@@ -931,6 +1011,7 @@ const defaultProfiles = {
                     listaClientes[index].Zona = zonaAtual;
                     listaClientes[index].Status = statusAtual;
                     listaClientes[index].Tratativa = tratativaAtual;
+                    listaClientes[index].Historico = historico;
                 }
                 
                 // Se o nome foi alterado, marcar o nome antigo como substituído para não reaparecer
@@ -950,7 +1031,8 @@ const defaultProfiles = {
                     Zona: zonaAtual,
                     Status: statusAtual,
                     Tratativa: tratativaAtual,
-                    Data: new Date().toISOString()
+                    Data: new Date().toISOString(),
+                    Historico: historico
                 };
                 desmarcarClienteDeletado(activeUserId, nomeAtual);
                 listaClientes.unshift(novoObj);
