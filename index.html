@@ -677,6 +677,21 @@ const defaultProfiles = {
             aplicarFiltros();
         }
 
+        // Converte o telefone digitado no cadastro em um link do WhatsApp.
+        // Devolve null quando não dá para montar um número confiável.
+        function montarLinkWhatsApp(telefone) {
+            let digitos = String(telefone || '').replace(/\D/g, '').replace(/^0+/, '');
+
+            // 10 ou 11 dígitos = número brasileiro sem país (DDD + 8 ou 9 dígitos)
+            if (digitos.length === 10 || digitos.length === 11) {
+                digitos = '55' + digitos;
+            }
+            // De 12 a 15 dígitos já vem com código de país (ex.: 55 + DDD + número)
+            if (digitos.length < 12 || digitos.length > 15) return null;
+
+            return 'https://wa.me/' + digitos;
+        }
+
         function renderizarTabela(dados) {
             const tabela = document.getElementById('tabelaClientes');
             tabela.innerHTML ="";
@@ -698,16 +713,14 @@ const defaultProfiles = {
                 if (cliente.Status === 'Fechado') badgeClass ="bg-emerald-50 text-emerald-700 border-emerald-200";
                 
                 let valorFmt = formatarMoedaView(cliente.ValorEstimado);
-                let cleanPhone = (cliente.Telefone || '').replace(/\D/g, '');
-                let whatsappBtn = '';
-                if(cleanPhone.length >= 10) {
-                    let fullPhone = cleanPhone.startsWith('55') ? cleanPhone : '55' + cleanPhone;
-                    whatsappBtn = `
-                        <a href="https://wa.me/${fullPhone}" target="_blank" onclick="event.stopPropagation()" class="text-emerald-600 hover:text-emerald-700 ml-1.5" title="Conversar no WhatsApp">
-                            <i class="fa-brands fa-whatsapp text-sm"></i>
-                        </a>
-                    `;
-                }
+                let linkWhats = montarLinkWhatsApp(cliente.Telefone);
+                let btnWhats = linkWhats
+                    ? `<a href="${linkWhats}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-emerald-600 hover:text-white bg-white hover:bg-emerald-500 border border-emerald-200 hover:border-emerald-500 p-2 rounded-lg transition shadow-sm" title="Conversar no WhatsApp">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </a>`
+                    : `<span class="text-slate-300 bg-slate-50 border border-slate-200 p-2 rounded-lg cursor-not-allowed" title="Sem telefone válido para WhatsApp">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </span>`;
 
                 let linha = `
                 <tr class="hover:bg-slate-50/90 transition border-b border-slate-100 last:border-0 group cursor-pointer" onclick="clicarLinhaTabela('${cliente.id}', event)">
@@ -722,7 +735,6 @@ const defaultProfiles = {
                         <div class="text-xs text-slate-500 mt-0.5 flex items-center">
                             <i class="fa-solid fa-phone mr-1 text-slate-300"></i>
                             <span>${cliente.Telefone || '-'}</span>
-                            ${whatsappBtn}
                         </div>
                     </td>
                     <td class="py-4 px-5">
@@ -743,6 +755,7 @@ const defaultProfiles = {
                     </td>
                     <td class="py-4 px-5 text-center">
                         <div class="flex items-center justify-center space-x-1.5" onclick="event.stopPropagation()">
+                            ${btnWhats}
                             <button type="button" onclick="copiarDetalhesCliente('${cliente.id}'); event.stopPropagation();" class="text-slate-400 hover:text-indigo-600 bg-white hover:bg-indigo-50 border border-slate-200 p-2 rounded-lg transition shadow-sm" title="Copiar informações">
                                 <i class="fa-regular fa-copy"></i>
                             </button>
