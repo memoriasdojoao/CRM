@@ -491,6 +491,18 @@ const defaultProfiles = {
 
         
 
+        // Lê a lista de clientes excluídos deste usuário no localStorage deste navegador.
+        // Sempre devolve um array (vazio se não existir ou se o dado estiver corrompido).
+        function getDeletedClients(userId) {
+            try {
+                let raw = localStorage.getItem(`crm_santos_deleted_${userId}`);
+                let lista = raw ? JSON.parse(raw) : [];
+                return Array.isArray(lista) ? lista : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
         function marcarClienteDeletado(userId, nome) {
             if(!nome) return;
             let norm = nome.trim().toLowerCase();
@@ -517,24 +529,23 @@ const defaultProfiles = {
             }
         }
 
-        const seedData = {
-            user1: [
-                { id: 'cli_seed_1', Nome: 'Fulano da Silva', Email: 'fulanosilva@gmail.com', Telefone: '11991375167', Projeto: 'Celebration', ValorEstimado: 'R$ 1.400.000,00', Bairro: 'Barra Funda', Zona: 'Oeste', Status: 'Em Negociação', Tratativa: 'Cliente não quero comprar. Está duro.', Data: '2026-10-15T23:18:13.000Z' },
-                { id: 'cli_seed_2', Nome: 'Ciclano', Email: 'dksnmskdm2@gmail.com', Telefone: '1134940001', Projeto: 'We', ValorEstimado: 'R$ 1.200.000,00', Bairro: 'Rocinha', Zona: 'Leste', Status: 'Em Negociação', Tratativa: 'ele quer comprar. Muito bom', Data: '2026-10-15T23:08:32.000Z' }
-            ],
-            user2: [],
-            user3: []
-        };
-
         function carregarCacheLocal() {
             if(!activeUserId) return [];
             try {
                 let raw = localStorage.getItem(`crm_santos_cache_${activeUserId}`);
-                if (raw) return JSON.parse(raw);
-                return seedData[activeUserId] || [];
+                return raw ? JSON.parse(raw) : [];
             } catch(e) {
-                return seedData[activeUserId] || [];
+                return [];
             }
+        }
+
+        function limparCacheLocalComConfirmacao() {
+            if(!confirm("Deseja realmente limpar o cache local e restaurar a sincronização original com a planilha?")) return;
+            localStorage.removeItem(`crm_santos_cache_${activeUserId}`);
+            localStorage.removeItem(`crm_santos_deleted_${activeUserId}`);
+            
+            mostrarToast("Cache limpo! Recarregando dados da planilha...");
+            carregarClientes();
         }
 
         // ==========================================
@@ -542,39 +553,15 @@ const defaultProfiles = {
         // ==========================================
         async function carregarClientes(showSpinner = true) {
             const btn = document.getElementById('btnAtualizar');
-            const icon = btn ? btn.querySelector('i') : null;
+            const icon = btn.querySelector('i');
             if(icon && showSpinner) icon.classList.add('fa-spin');
 
             const currentUser = profiles[activeUserId];
             if(!currentUser) return;
 
-            // Se a lista estiver vazia na memória, carrega cache primeiro
-            if(listaClientes.length === 0) {
-                let cached = carregarCacheLocal();
-                if(cached && cached.length > 0) {
-                    listaClientes = cached;
-                    aplicarFiltros();
-                }
-            }
-
             try {
-                let fetchUrl = `${WEB_APP_URL}?aba=${encodeURIComponent(currentUser.name)}`;
-                let resposta = await fetch(fetchUrl, {
-                    method: 'GET',
-                    mode: 'cors',
-                    redirect: 'follow'
-                });
-
-                if(!resposta.ok) {
-                    throw new Error("HTTP_" + resposta.status);
-                }
-
-                let texto = await resposta.text();
-                if(texto.trim().startsWith('<')) {
-                    throw new Error("GOOGLE_LOGIN_REQUIRED");
-                }
-
-                let dados = JSON.parse(texto);
+                let resposta = await fetch(`${WEB_APP_URL}?aba=${encodeURIComponent(currentUser.name)}&_t=${Date.now()}`);
+                let dados = await resposta.json();
                 
                 if(Array.isArray(dados)) {
                     let deletedNames = getDeletedClients(activeUserId);
@@ -627,48 +614,14 @@ const defaultProfiles = {
                 }
             } catch (erro) {
                 console.error("Erro ao sincronizar com Google Sheets:", erro);
-                let isFileProtocol = window.location.protocol === 'file:';
-                let isGoogleLogin = erro && erro.message === "GOOGLE_LOGIN_REQUIRED";
-
                 if(listaClientes.length === 0) {
-                    let detalheErro = "";
-                    if(isFileProtocol) {
-                        detalheErro = `
-                            <div class="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 text-left max-w-md mx-auto space-y-2">
-                                <p class="font-bold flex items-center gap-1.5"><i class="fa-solid fa-mobile-screen text-amber-600"></i> Bloqueio de arquivo local no celular:</p>
-                                <p>Navegadores móveis (Safari e Chrome no celular) bloqueiam requisições de rede quando o arquivo é aberto direto da memória (<code class="bg-amber-100 px-1 py-0.5 rounded font-mono">file://</code>).</p>
-                                <p class="font-semibold text-slate-800">Como acessar normalmente no celular:</p>
-                                <ul class="list-disc pl-4 space-y-1 text-slate-700">
-                                    <li>Acesse por um link web online (HTTPS), ou</li>
-                                    <li>Abra em um computador ou servidor local.</li>
-                                </ul>
-                            </div>
-                        `;
-                    } else if(isGoogleLogin) {
-                        detalheErro = `
-                            <div class="mt-4 p-4 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 text-left max-w-md mx-auto">
-                                <p class="font-bold mb-1"><i class="fa-brands fa-google text-amber-600 mr-1"></i> Autenticação do Google:</p>
-                                <p>Sua conta no celular precisa de autorização no Google Apps Script. Abra a planilha do Google Sheets pelo menos uma vez no celular para autorizar.</p>
-                            </div>
-                        `;
-                    }
-
                     document.getElementById('tabelaClientes').innerHTML = `
                         <tr>
-                            <td colspan="6" class="py-10 text-center text-slate-600">
-                                <div class="max-w-md mx-auto px-4">
-                                    <i class="fa-solid fa-triangle-exclamation text-3xl text-amber-500 mb-3 block"></i>
-                                    <h4 class="font-bold text-slate-900 text-base mb-1">Não foi possível conectar à planilha agora</h4>
-                                    <p class="text-xs text-slate-500 mb-4">Verifique sua conexão ou tente novamente.</p>
-                                    <button onclick="carregarClientes()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition shadow-sm inline-flex items-center gap-2">
-                                        <i class="fa-solid fa-rotate-right"></i> Tentar Novamente
-                                    </button>
-                                    ${detalheErro}
-                                </div>
+                            <td colspan="6" class="py-12 text-center text-rose-500 font-semibold">
+                                <i class="fa-solid fa-triangle-exclamation text-2xl mb-2 block"></i>
+                                Erro ao buscar dados da aba ${currentUser.name}. Verifique a conexão com a internet.
                             </td>
                         </tr>`;
-                } else {
-                    mostrarToast("Modo offline: exibindo dados em cache.", "aviso");
                 }
             } finally {
                 if(icon) icon.classList.remove('fa-spin');
