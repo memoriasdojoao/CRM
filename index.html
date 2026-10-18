@@ -12,6 +12,8 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
     <style>
         .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
@@ -231,9 +233,21 @@
 
         <!-- PÁGINA DO PAINEL -->
         <main id="paginaPainel" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <button type="button" onclick="irParaClientes()" class="mb-4 inline-flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-xl text-sm font-semibold transition shadow-sm">
-                <i class="fa-solid fa-arrow-left"></i> Voltar para clientes
-            </button>
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <button type="button" onclick="irParaClientes()" class="inline-flex items-center gap-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-2 rounded-xl text-sm font-semibold transition shadow-sm">
+                    <i class="fa-solid fa-arrow-left"></i> Voltar para clientes
+                </button>
+                <div class="flex items-center gap-2">
+                    <select id="periodoRelatorio" class="bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="15">Últimos 15 dias</option>
+                        <option value="30">Últimos 30 dias</option>
+                    </select>
+                    <button type="button" onclick="baixarRelatorioPDF()" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-sm font-semibold transition shadow-sm">
+                        <i class="fa-solid fa-file-pdf"></i> Baixar PDF
+                    </button>
+                </div>
+            </div>
             <section id="painelMetricas" class="space-y-4"></section>
         </main>
     </div>
@@ -308,6 +322,8 @@
                             <option value="Venda realizada">Venda realizada</option>
                             <option value="Não responde">Não responde</option>
                         </select>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5 mt-3">Data de entrada do lead</label>
+                        <input type="date" id="dataEntrada" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition">
                     </div>
                     <div class="sm:col-span-2">
                         <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1.5">Tratativa / Anotações</label>
@@ -365,11 +381,29 @@
             } catch (e) { return []; }
         }
 
+        // Data de hoje (ou de um Date) no formato do <input type="date">, no fuso local
+        function hojeInput() { return paraInput(new Date()); }
+        function paraInput(d) {
+            if (!d) return '';
+            let x = new Date(d);
+            if (isNaN(x)) return '';
+            x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
+            return x.toISOString().slice(0, 10);
+        }
+        // Data de entrada do lead: a informada no cadastro; se não houver, a data de registro da planilha
+        function dataEntradaDe(c) { return parseDataFlex(c.DataEntrada || c.Data); }
+        function formatarRazao(v, t) {
+            const mdc = (a, b) => b ? mdc(b, a % b) : a;
+            return t === 0 ? '-' : v === 0 ? `0/${t}` : `${v / mdc(v, t)}/${t / mdc(v, t)}`;
+        }
+
         // Lê datas em ISO, dd/mm/aaaa ou dd/mm/aaaa hh:mm:ss
         function parseDataFlex(v) {
             if (!v) return null;
             if (v instanceof Date) return isNaN(v) ? null : v;
             let t = String(v).trim();
+            let iso = t.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (iso) return new Date(+iso[1], +iso[2] - 1, +iso[3], 12);
             let m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ ,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
             let d = m ? new Date(+m[3], +m[2] - 1, +m[1], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0)) : new Date(t);
             return isNaN(d) ? null : d;
@@ -665,7 +699,8 @@ const defaultProfiles = {
                             Status: normalizarStatus(item.Status || item.status),
                             Tratativa: (item.Tratativa || item.tratativa || '').trim(),
                             Data: item.Data || item.data || '',
-                            Historico: parseHistorico(item.Historico || item.historico)
+                            Historico: parseHistorico(item.Historico || item.historico),
+                            DataEntrada: String(item.DataEntrada || item['Data de entrada'] || item.dataEntrada || '')
                         };
 
                         // Sobrescreve com a versão mais recente
@@ -678,6 +713,7 @@ const defaultProfiles = {
                     mapPorCliente.forEach((c, k) => {
                         let a = anteriores.get(k);
                         if (a && a.Historico && a.Historico.length && !c.Historico.length) c.Historico = a.Historico;
+                        if (a && a.DataEntrada && !c.DataEntrada) c.DataEntrada = a.DataEntrada;
                     });
 
                     listaClientes = Array.from(mapPorCliente.values()).reverse();
@@ -882,6 +918,99 @@ const defaultProfiles = {
             renderizarPainel(lista);
         }
 
+        function baixarRelatorioPDF() {
+            if (!window.jspdf) { mostrarToast("A biblioteca de PDF não carregou. Verifique a conexão e recarregue a página.", "erro"); return; }
+            const dias = parseInt(document.getElementById('periodoRelatorio').value, 10) || 7;
+            const lista = listaClientes;
+            const nome = (profiles[activeUserId] && profiles[activeUserId].name) || '';
+            const agora = new Date();
+            const desde = new Date(); desde.setHours(0, 0, 0, 0); desde.setDate(desde.getDate() - (dias - 1));
+            const fmt = d => d.toLocaleDateString('pt-BR');
+
+            // Métricas do período (mesmas regras do painel)
+            const leadsP = lista.filter(c => { const d = dataEntradaDe(c); return d && d >= desde; }).sort((a, b) => dataEntradaDe(b) - dataEntradaDe(a));
+            const visitasP = lista.filter(c => (c.Historico || []).some(e => e.s === 'Visita realizada' && e.d && new Date(e.d) >= desde)).length;
+            const entrouNoPeriodo = (c, st) => { const e = (c.Historico || []).filter(x => x.s === st && x.d).pop(); return c.Status === st && e && new Date(e.d) >= desde; };
+            const naoRespP = lista.filter(c => entrouNoPeriodo(c, 'Não responde')).length;
+            const vendasP = lista.filter(c => entrouNoPeriodo(c, 'Venda realizada')).length;
+            const total = lista.length;
+            const vendas = lista.filter(c => c.Status === 'Venda realizada').length;
+            const pct = total ? (vendas / total * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : '-';
+            const semData = lista.filter(c => !dataEntradaDe(c)).length;
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+            const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 40;
+
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(18); doc.setTextColor(15, 23, 42);
+            doc.text('Relatório de leads', M, 54);
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(100, 116, 139);
+            doc.text(`${nome} - últimos ${dias} dias (${fmt(desde)} a ${fmt(agora)})`, M, 72);
+            doc.text(`Gerado em ${agora.toLocaleString('pt-BR')}`, M, 86);
+            doc.setDrawColor(226, 232, 240); doc.line(M, 98, W - M, 98);
+
+            let y = 98;
+            const titulo = txt => {
+                y = (y === 98 ? 98 : doc.lastAutoTable.finalY) + 26;
+                if (y > H - 110) { doc.addPage(); y = 56; }
+                doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(15, 23, 42);
+                doc.text(txt, M, y);
+                y += 8;
+            };
+            const tabela = (head, body, extra) => {
+                doc.autoTable(Object.assign({
+                    startY: y, head: [head], body, theme: 'grid', margin: { left: M, right: M },
+                    styles: { font: 'helvetica', fontSize: 9, cellPadding: 5, lineColor: [226, 232, 240], textColor: [30, 41, 59] },
+                    headStyles: { fillColor: [30, 41, 59], textColor: 255, fontStyle: 'bold' },
+                    alternateRowStyles: { fillColor: [248, 250, 252] }
+                }, extra || {}));
+            };
+
+            titulo('Resumo do período');
+            tabela(['Indicador', 'Valor'], [
+                ['Leads recebidos no período', String(leadsP.length)],
+                ['Visitas realizadas no período', String(visitasP)],
+                ['Vendas realizadas no período', String(vendasP)],
+                ['Marcados como "Não responde" no período', String(naoRespP)],
+                ['Visitas agendadas (situação atual)', String(lista.filter(c => c.Status === 'Visita agendada').length)],
+                ['Total de leads (geral)', String(total)],
+                ['Relação compra/leads (geral)', `${formatarRazao(vendas, total)}  (${vendas} venda(s) em ${total} lead(s) - ${pct})`]
+            ], { columnStyles: { 0: { cellWidth: 260 }, 1: { fontStyle: 'bold' } } });
+
+            titulo('Clientes por status (situação atual)');
+            tabela(['Status', 'Clientes', '% do total'], STATUS_LISTA.map(st => {
+                const n = lista.filter(c => c.Status === st).length;
+                return [st, String(n), total ? (n / total * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : '-'];
+            }), { columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } }, didParseCell: d => { if (d.section === 'head' && d.column.index > 0) d.cell.styles.halign = 'right'; } });
+
+            titulo(`Leads recebidos no período (${leadsP.length})`);
+            if (leadsP.length) {
+                tabela(['Entrada', 'Nome', 'Telefone', 'Status'], leadsP.map(c => [fmt(dataEntradaDe(c)), c.Nome || '', c.Telefone || '', c.Status || '']),
+                    { columnStyles: { 0: { cellWidth: 62 }, 2: { cellWidth: 95 }, 3: { cellWidth: 95 } } });
+            } else {
+                doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(100, 116, 139);
+                doc.text('Nenhum lead recebido neste período.', M, y + 10);
+                doc.lastAutoTable = { finalY: y + 10 };
+            }
+
+            // Observações
+            let obs = ['Visitas, vendas e "Não responde" do período usam a data em que o status foi alterado no sistema.'];
+            if (semData) obs.push(`${semData} cliente(s) sem data de entrada não entram nos períodos.`);
+            let yo = doc.lastAutoTable.finalY + 18;
+            if (yo > H - 70) { doc.addPage(); yo = 56; }
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(100, 116, 139);
+            doc.text(obs, M, yo);
+
+            const n = doc.getNumberOfPages();
+            for (let i = 1; i <= n; i++) {
+                doc.setPage(i); doc.setFontSize(8); doc.setTextColor(148, 163, 184);
+                doc.text(`Página ${i} de ${n}`, W - M, H - 24, { align: 'right' });
+            }
+
+            const slug = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase() || 'perfil';
+            doc.save(`relatorio-leads-${slug}-${dias}dias-${hojeInput()}.pdf`);
+        }
+
         function renderizarPainel(lista) {
             const el = document.getElementById('painelMetricas');
             if (!el) return;
@@ -891,7 +1020,7 @@ const defaultProfiles = {
             const hoje = inicio(0), d7 = inicio(6), d30 = inicio(29), tudo = new Date(0);
             const total = lista.length;
 
-            const criados = lista.map(c => parseDataFlex(c.Data));
+            const criados = lista.map(dataEntradaDe);
             const leadsDesde = s => criados.filter(d => d && d >= s).length;
 
             const ultimaData = (c, st) => { let e = (c.Historico || []).filter(x => x.s === st && x.d).pop(); return e ? new Date(e.d) : null; };
@@ -927,15 +1056,15 @@ const defaultProfiles = {
             if (semDataStatus) aviso.push(`${semDataStatus} registro(s) de visita/não responde sem data da mudança de status entram só no total`);
 
             const nome = (profiles[activeUserId] && profiles[activeUserId].name) || '';
-            const chips = [`<button onclick="filtrarPorCard('')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase border bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 transition">Todos · ${total}</button>`]
-                .concat(STATUS_LISTA.map(st => `<button onclick="filtrarPorCard('${st}')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold uppercase border ${STATUS_COR[st]} hover:shadow-sm transition">${st} · ${lista.filter(c => c.Status === st).length}</button>`)).join('');
+            const chips = [['', 'Todos', total]].concat(STATUS_LISTA.map(st => [st, st, lista.filter(c => c.Status === st).length]))
+                .map(([f, rot, n]) => `<button onclick="filtrarPorCard('${f}')" class="inline-flex items-center gap-2 pl-3 pr-1.5 py-1 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:border-slate-400 hover:text-slate-900 transition">${rot}<span class="min-w-[1.5rem] text-center px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-800 font-bold">${n}</span></button>`).join('');
 
             el.innerHTML = `
                 <h2 class="text-lg font-extrabold text-slate-900">Painel de ${nome}</h2>
                 ${bloco('Leads recebidos', 'fa-solid fa-bullseye', card('Hoje', leadsDesde(hoje)) + card('Últimos 7 dias', leadsDesde(d7)) + card('Últimos 30 dias', leadsDesde(d30)) + card('Geral', total, '', ''))}
                 ${bloco('Visitas', 'fa-solid fa-house-circle-check', card('Agendadas agora', lista.filter(c => c.Status === 'Visita agendada').length, '', 'Visita agendada') + card('Realizadas 7 dias', visitasDesde(d7)) + card('Realizadas 30 dias', visitasDesde(d30)) + card('Realizadas total', visitasTotal))}
                 ${bloco('Conversão e sem resposta', 'fa-solid fa-chart-pie', card('Compra / Leads', razao, `${vendas} venda(s) em ${total} lead(s)${pct ? ' · ' + pct : ''}`, 'Venda realizada') + card('Não responde 7 dias', naoRespDesde(d7), '', 'Não responde') + card('Não responde 30 dias', naoRespDesde(d30), '', 'Não responde') + card('Não responde total', naoResp.length, '', 'Não responde'))}
-                <div class="flex flex-wrap gap-2">${chips}</div>
+                <div><h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-filter mr-1.5"></i>Clientes por status</h3><div class="flex flex-wrap gap-2">${chips}</div></div>
                 ${aviso.length ? `<p class="text-[11px] text-slate-400">${aviso.join('. ')}.</p>` : ''}`;
         }
 
@@ -988,6 +1117,7 @@ const defaultProfiles = {
         function abrirModalCliente() {
             document.getElementById('formCliente').reset();
             document.getElementById('clienteId').value ="";
+            document.getElementById('dataEntrada').value = hojeInput();
             document.getElementById('originalNome').value ="";
             document.getElementById('modalClienteTitulo').innerText ="Novo Registro";
             document.getElementById('btnExcluirModal').classList.add('hidden');
@@ -1009,6 +1139,7 @@ const defaultProfiles = {
             document.getElementById('zona').value = c.Zona;
             document.getElementById('status').value = c.Status;
             document.getElementById('tratativa').value = c.Tratativa;
+            document.getElementById('dataEntrada').value = paraInput(dataEntradaDe(c));
             
             let inputV = document.getElementById('valorEstimado');
             inputV.value = formatarValorParaInput(c.ValorEstimado);
@@ -1071,6 +1202,8 @@ const defaultProfiles = {
                 historico.push({ s: statusAtual, d: new Date().toISOString() });
             }
 
+            const dataEntradaAtual = document.getElementById('dataEntrada').value || (clienteAtual ? (clienteAtual.DataEntrada || '') : hojeInput());
+
             const dadosPayload = {
                 acao: isEdit ?"editar" :"novo",
                 aba: profiles[activeUserId].name,
@@ -1084,7 +1217,8 @@ const defaultProfiles = {
                 zona: zonaAtual,
                 status: statusAtual,
                 tratativa: tratativaAtual,
-                historico: JSON.stringify(historico)
+                historico: JSON.stringify(historico),
+                dataEntrada: dataEntradaAtual
             };
 
             // 1. ATUALIZAÇÃO IMEDIATA NO ESTADO LOCAL (OPTIMISTIC UI):
@@ -1103,6 +1237,7 @@ const defaultProfiles = {
                     listaClientes[index].Status = statusAtual;
                     listaClientes[index].Tratativa = tratativaAtual;
                     listaClientes[index].Historico = historico;
+                    listaClientes[index].DataEntrada = dataEntradaAtual;
                 }
                 
                 // Se o nome foi alterado, marcar o nome antigo como substituído para não reaparecer
@@ -1123,6 +1258,7 @@ const defaultProfiles = {
                     Status: statusAtual,
                     Tratativa: tratativaAtual,
                     Data: new Date().toISOString(),
+                    DataEntrada: dataEntradaAtual,
                     Historico: historico
                 };
                 desmarcarClienteDeletado(activeUserId, nomeAtual);
